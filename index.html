@@ -1,0 +1,2973 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Padlet - 視覚的コラボレーション掲示板</title>
+  <meta name="description" content="直感的な操作でアイデアやメモ、画像を共有できるオンライン掲示板 Padlet MVP">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23ff4081'/><path d='M30 25h40a5 5 0 0 1 5 5v35a5 5 0 0 1-5 5H45L30 80V30a5 5 0 0 1 5-5z' fill='white'/><circle cx='43' cy='45' r='4' fill='%23ff4081'/><circle cx='57' cy='45' r='4' fill='%23ff4081'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ==========================================================================
+       CSS Variables & Themes
+       ========================================================================== */
+    :root {
+      --primary: #ff4081;
+      --primary-hover: #f50057;
+      --primary-light: #fce4ec;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --text-light: #94a3b8;
+      --bg-header: rgba(255, 255, 255, 0.88);
+      --border-color: rgba(226, 232, 240, 0.8);
+      --card-shadow: 0 4px 14px -2px rgba(0, 0, 0, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.04);
+      --card-shadow-hover: 0 12px 24px -4px rgba(0, 0, 0, 0.12), 0 4px 8px -2px rgba(0, 0, 0, 0.06);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 18px;
+      --radius-full: 9999px;
+      --header-height: 64px;
+      --font-family: 'Plus Jakarta Sans', 'Noto Sans JP', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    /* Background Wallpapers */
+    body.theme-pastel {
+      background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%);
+      background-attachment: fixed;
+    }
+    body.theme-corkboard {
+      background-color: #d4a373;
+      background-image: radial-gradient(#b07d50 15%, transparent 16%), radial-gradient(#b07d50 15%, transparent 16%);
+      background-size: 20px 20px;
+      background-position: 0 0, 10px 10px;
+      background-attachment: fixed;
+    }
+    body.theme-blueprint {
+      background-color: #1e3a8a;
+      background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.15) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.15) 1px, transparent 1px);
+      background-size: 24px 24px;
+      background-attachment: fixed;
+    }
+    body.theme-sunset {
+      background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 60%, #a1c4fd 100%);
+      background-attachment: fixed;
+    }
+    body.theme-mint {
+      background: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%);
+      background-attachment: fixed;
+    }
+    body.theme-dark {
+      background: #0f172a;
+      background-image: radial-gradient(#334155 1px, transparent 1px);
+      background-size: 24px 24px;
+      background-attachment: fixed;
+    }
+    body.theme-minimal {
+      background: #f8fafc;
+      background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+      background-size: 20px 20px;
+      background-attachment: fixed;
+    }
+
+    /* Dark theme text contrast adjustments for header */
+    body.theme-dark, body.theme-blueprint {
+      --bg-header: rgba(15, 23, 42, 0.88);
+      --border-color: rgba(51, 65, 85, 0.8);
+      --text-main: #f8fafc;
+      --text-muted: #cbd5e1;
+    }
+
+    /* ==========================================================================
+       Reset & Base Styles
+       ========================================================================== */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: var(--font-family);
+      color: var(--text-main);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* ==========================================================================
+       Header & Navigation Bar
+       ========================================================================== */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      height: var(--header-height);
+      background: var(--bg-header);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      gap: 16px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .logo-badge {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #ff4081, #ff6b6b);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      box-shadow: 0 4px 10px rgba(255, 64, 129, 0.35);
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .logo-badge:hover {
+      transform: scale(1.06) rotate(-4deg);
+    }
+
+    .board-info {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .board-title-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .board-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: var(--radius-sm);
+      transition: background 0.15s;
+    }
+    .board-title:hover {
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    .board-subtitle {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Center view tabs */
+    .view-switcher {
+      display: flex;
+      background: rgba(0, 0, 0, 0.06);
+      padding: 3px;
+      border-radius: var(--radius-full);
+      gap: 2px;
+      flex-shrink: 0;
+    }
+
+    .view-tab {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border: none;
+      background: transparent;
+      border-radius: var(--radius-full);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+    .view-tab.active {
+      background: white;
+      color: var(--text-main);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+    body.theme-dark .view-tab.active {
+      background: #1e293b;
+      color: #fff;
+    }
+
+    /* Header Right Actions */
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .search-box {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-input {
+      padding: 8px 14px 8px 34px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--border-color);
+      background: rgba(255, 255, 255, 0.7);
+      font-size: 0.85rem;
+      font-family: inherit;
+      color: var(--text-main);
+      width: 170px;
+      transition: width 0.25s, background 0.2s, border-color 0.2s;
+    }
+    .search-input:focus {
+      outline: none;
+      width: 220px;
+      background: white;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(255, 64, 129, 0.15);
+    }
+    body.theme-dark .search-input {
+      background: #1e293b;
+      border-color: #334155;
+      color: white;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 10px;
+      pointer-events: none;
+      color: var(--text-light);
+      display: flex;
+      align-items: center;
+    }
+
+    .btn-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--border-color);
+      background: rgba(255, 255, 255, 0.8);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-icon:hover {
+      background: white;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+      color: var(--primary);
+    }
+    body.theme-dark .btn-icon {
+      background: #1e293b;
+      border-color: #334155;
+      color: white;
+    }
+
+    .btn-primary {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: linear-gradient(135deg, #ff4081, #ff6b6b);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: var(--radius-full);
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(255, 64, 129, 0.35);
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(255, 64, 129, 0.45);
+    }
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    /* Sub-bar Filter Bar */
+    .filter-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 24px;
+      background: rgba(255, 255, 255, 0.55);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+      font-size: 0.82rem;
+      gap: 12px;
+      overflow-x: auto;
+    }
+    body.theme-dark .filter-bar {
+      background: rgba(15, 23, 42, 0.65);
+      border-bottom-color: rgba(51, 65, 85, 0.6);
+    }
+
+    .filter-pills {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .filter-label {
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.78rem;
+    }
+
+    .color-pill {
+      width: 20px;
+      height: 20px;
+      border-radius: var(--radius-full);
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: transform 0.15s, border-color 0.15s;
+    }
+    .color-pill:hover {
+      transform: scale(1.2);
+    }
+    .color-pill.active {
+      border-color: #1e293b;
+      transform: scale(1.25);
+    }
+
+    .stat-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    /* ==========================================================================
+       Board Views Container
+       ========================================================================== */
+    .board-viewport {
+      position: relative;
+      min-height: calc(100vh - var(--header-height) - 45px);
+      padding: 24px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    /* 1. WALL VIEW (Masonry style Grid) */
+    .view-wall {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+      align-items: start;
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+
+    /* 2. SECTIONS / SHELF VIEW (Kanban-style columns) */
+    .view-sections {
+      display: flex;
+      gap: 24px;
+      overflow-x: auto;
+      padding-bottom: 24px;
+      align-items: flex-start;
+      min-height: calc(100vh - 160px);
+    }
+
+    .section-column {
+      flex: 0 0 320px;
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-color);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+      display: flex;
+      flex-direction: column;
+      max-height: calc(100vh - 170px);
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+    body.theme-dark .section-column {
+      background: rgba(30, 41, 59, 0.8);
+    }
+
+    .section-column.drag-over {
+      background: rgba(255, 64, 129, 0.08);
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px var(--primary);
+    }
+
+    .section-header {
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-color);
+      gap: 8px;
+    }
+
+    .section-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-count {
+      background: rgba(0, 0, 0, 0.08);
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .section-cards-list {
+      padding: 12px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex: 1;
+      min-height: 120px;
+    }
+
+    .section-add-card-btn {
+      margin: 8px 12px 12px;
+      padding: 8px;
+      border: 2px dashed var(--border-color);
+      border-radius: var(--radius-md);
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .section-add-card-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: rgba(255, 64, 129, 0.05);
+    }
+
+    .add-section-col {
+      flex: 0 0 280px;
+      border: 2px dashed rgba(255, 255, 255, 0.7);
+      background: rgba(255, 255, 255, 0.35);
+      backdrop-filter: blur(8px);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 160px;
+      cursor: pointer;
+      color: var(--text-main);
+      font-weight: 700;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .add-section-col:hover {
+      background: rgba(255, 255, 255, 0.6);
+      transform: translateY(-2px);
+    }
+
+    /* 3. CANVAS VIEW (Freeform / Drag to Position) */
+    .view-canvas {
+      position: relative;
+      width: 3200px;
+      height: 2400px;
+      background-image: radial-gradient(rgba(0, 0, 0, 0.15) 1px, transparent 1px);
+      background-size: 30px 30px;
+      cursor: crosshair;
+    }
+    body.theme-dark .view-canvas {
+      background-image: radial-gradient(rgba(255, 255, 255, 0.2) 1px, transparent 1px);
+    }
+
+    .canvas-hint {
+      position: fixed;
+      bottom: 24px;
+      left: 24px;
+      background: rgba(0, 0, 0, 0.75);
+      color: white;
+      padding: 8px 16px;
+      border-radius: var(--radius-full);
+      font-size: 0.8rem;
+      backdrop-filter: blur(8px);
+      pointer-events: none;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    /* ==========================================================================
+       Card Component
+       ========================================================================== */
+    .card {
+      border-radius: var(--radius-lg);
+      box-shadow: var(--card-shadow);
+      border: 1px solid rgba(0, 0, 0, 0.07);
+      background: white;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, opacity 0.2s;
+      position: relative;
+      user-select: none;
+    }
+
+    .card:hover {
+      box-shadow: var(--card-shadow-hover);
+      transform: translateY(-3px);
+    }
+
+    .card.dragging {
+      opacity: 0.45;
+      transform: scale(0.98);
+    }
+
+    .card.in-canvas {
+      position: absolute;
+      width: 300px;
+      cursor: grab;
+      z-index: 10;
+    }
+    .card.in-canvas:active {
+      cursor: grabbing;
+      z-index: 20;
+    }
+
+    /* Card Color Themes */
+    .card-color-yellow { background: #fffbeb; border-color: #fde68a; }
+    .card-color-rose   { background: #fff1f2; border-color: #fecdd3; }
+    .card-color-mint   { background: #ecfdf5; border-color: #a7f3d0; }
+    .card-color-blue   { background: #eff6ff; border-color: #bfdbfe; }
+    .card-color-purple { background: #f5f3ff; border-color: #ddd6fe; }
+    .card-color-orange { background: #fff7ed; border-color: #fed7aa; }
+    .card-color-white  { background: #ffffff; border-color: #e2e8f0; }
+    .card-color-dark   { background: #1e293b; border-color: #334155; color: #f8fafc; }
+    .card-color-dark .card-title, 
+    .card-color-dark .card-content, 
+    .card-color-dark .card-author { color: #f8fafc; }
+    .card-color-dark .card-meta, 
+    .card-color-dark .card-date { color: #94a3b8; }
+    .card-color-dark .card-actions-btn { color: #cbd5e1; }
+    .card-color-dark .card-footer { border-top-color: #334155; }
+    .card-color-dark .comment-box { background: rgba(15, 23, 42, 0.6); }
+
+    /* Card Pin Badge */
+    .card-pinned-badge {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      color: #ff4081;
+      font-size: 0.9rem;
+      transform: rotate(20deg);
+      z-index: 2;
+    }
+
+    /* Card Header */
+    .card-header {
+      padding: 14px 16px 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .card-user-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .card-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: var(--radius-full);
+      background: linear-gradient(135deg, #a855f7, #ec4899);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .card-meta {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .card-author {
+      font-size: 0.82rem;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card-date {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    .card-menu-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, color 0.15s;
+    }
+    .card-menu-btn:hover {
+      background: rgba(0, 0, 0, 0.06);
+      color: var(--text-main);
+    }
+
+    /* Card Image Attachment */
+    .card-image-wrap {
+      width: 100%;
+      max-height: 220px;
+      overflow: hidden;
+      cursor: pointer;
+      position: relative;
+    }
+    .card-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.3s;
+    }
+    .card-image-wrap:hover .card-image {
+      transform: scale(1.03);
+    }
+
+    /* Card Body */
+    .card-body {
+      padding: 10px 16px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      line-height: 1.35;
+      word-break: break-word;
+    }
+
+    .card-content {
+      font-size: 0.88rem;
+      line-height: 1.55;
+      color: #334155;
+      word-break: break-word;
+      white-space: pre-wrap;
+    }
+
+    /* Link Attachment Badge */
+    .card-link-preview {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: rgba(0, 0, 0, 0.04);
+      border-radius: var(--radius-md);
+      text-decoration: none;
+      color: inherit;
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      transition: background 0.15s;
+      margin-top: 4px;
+    }
+    .card-link-preview:hover {
+      background: rgba(0, 0, 0, 0.08);
+    }
+    .card-link-title {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #0284c7;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1;
+    }
+
+    /* Checklist Items */
+    .card-checklist {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 4px;
+    }
+    .checklist-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+    .checklist-item input[type="checkbox"] {
+      margin-top: 3px;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+    .checklist-item.done span {
+      text-decoration: line-through;
+      color: var(--text-light);
+    }
+
+    /* Card Tags */
+    .card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 4px;
+    }
+    .tag-chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      background: rgba(0, 0, 0, 0.06);
+      border-radius: var(--radius-full);
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .tag-chip:hover {
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    /* Card Footer */
+    .card-footer {
+      padding: 8px 16px 10px;
+      border-top: 1px solid rgba(0, 0, 0, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .card-footer-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-actions-btn {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: transparent;
+      border: none;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: var(--radius-sm);
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+    .card-actions-btn:hover {
+      background: rgba(0, 0, 0, 0.06);
+      color: var(--text-main);
+    }
+    .card-actions-btn.liked {
+      color: #e11d48;
+    }
+    .card-actions-btn.liked svg {
+      fill: #e11d48;
+      transform: scale(1.15);
+    }
+
+    /* Comments Section inside Card */
+    .card-comments-drawer {
+      border-top: 1px solid rgba(0, 0, 0, 0.06);
+      background: rgba(0, 0, 0, 0.02);
+      padding: 12px 16px;
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .card-comments-drawer.open {
+      display: flex;
+    }
+
+    .comments-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .comment-item {
+      display: flex;
+      gap: 8px;
+      font-size: 0.8rem;
+      line-height: 1.4;
+    }
+
+    .comment-author {
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .comment-text {
+      color: #334155;
+      word-break: break-word;
+    }
+    body.theme-dark .comment-text {
+      color: #cbd5e1;
+    }
+
+    .comment-form {
+      display: flex;
+      gap: 6px;
+      margin-top: 4px;
+    }
+    .comment-input {
+      flex: 1;
+      padding: 6px 12px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--border-color);
+      font-size: 0.8rem;
+      background: white;
+      font-family: inherit;
+    }
+    .comment-input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    body.theme-dark .comment-input {
+      background: #1e293b;
+      color: white;
+      border-color: #334155;
+    }
+
+    .comment-submit-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: var(--radius-full);
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    .comment-submit-btn:hover {
+      background: var(--primary-hover);
+    }
+
+    /* ==========================================================================
+       Floating Action Button (FAB)
+       ========================================================================== */
+    .fab-btn {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 58px;
+      height: 58px;
+      border-radius: var(--radius-full);
+      background: linear-gradient(135deg, #ff4081, #ff6b6b);
+      color: white;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 24px rgba(255, 64, 129, 0.45);
+      cursor: pointer;
+      z-index: 90;
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s;
+    }
+    .fab-btn:hover {
+      transform: scale(1.1) rotate(90deg);
+      box-shadow: 0 12px 28px rgba(255, 64, 129, 0.55);
+    }
+    .fab-btn:active {
+      transform: scale(0.95);
+    }
+
+    /* ==========================================================================
+       Modal Dialogs (Create/Edit Post, Settings, Share)
+       ========================================================================== */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 560px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.25);
+      transform: scale(0.95) translateY(10px);
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      overflow: hidden;
+    }
+    .modal-overlay.active .modal-content {
+      transform: scale(1) translateY(0);
+    }
+    body.theme-dark .modal-content {
+      background: #1e293b;
+      color: white;
+    }
+
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+    }
+
+    .modal-close-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 6px;
+      border-radius: var(--radius-full);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+    }
+    .modal-close-btn:hover {
+      background: rgba(0, 0, 0, 0.06);
+      color: var(--text-main);
+    }
+
+    .modal-body {
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    body.theme-dark .form-label {
+      color: #f8fafc;
+    }
+
+    .form-input, .form-textarea, .form-select {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+      background: #f8fafc;
+      font-size: 0.9rem;
+      font-family: inherit;
+      color: var(--text-main);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    body.theme-dark .form-input,
+    body.theme-dark .form-textarea,
+    body.theme-dark .form-select {
+      background: #0f172a;
+      border-color: #334155;
+      color: white;
+    }
+    .form-input:focus, .form-textarea:focus, .form-select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(255, 64, 129, 0.15);
+      background: white;
+    }
+    body.theme-dark .form-input:focus, 
+    body.theme-dark .form-textarea:focus, 
+    body.theme-dark .form-select:focus {
+      background: #0f172a;
+    }
+
+    .form-textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    /* Color Swatch Picker */
+    .color-swatches {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .color-swatch-item {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      border: 3px solid transparent;
+      transition: transform 0.15s, border-color 0.15s;
+    }
+    .color-swatch-item:hover {
+      transform: scale(1.15);
+    }
+    .color-swatch-item.selected {
+      border-color: #1e293b;
+      transform: scale(1.15);
+    }
+    body.theme-dark .color-swatch-item.selected {
+      border-color: #ffffff;
+    }
+
+    /* Modal Footer */
+    .modal-footer {
+      padding: 14px 20px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      background: rgba(0, 0, 0, 0.02);
+    }
+
+    .btn-secondary {
+      padding: 8px 16px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--border-color);
+      background: white;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--text-main);
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+    .btn-secondary:hover {
+      background: #f1f5f9;
+    }
+    body.theme-dark .btn-secondary {
+      background: #1e293b;
+      border-color: #334155;
+      color: white;
+    }
+
+    /* Image Preview in Modal */
+    .preview-image-wrap {
+      position: relative;
+      margin-top: 8px;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      max-height: 180px;
+      display: none;
+    }
+    .preview-image-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .preview-remove-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(0, 0, 0, 0.6);
+      color: white;
+      border: none;
+      border-radius: var(--radius-full);
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    /* Checklist builder in Modal */
+    .checklist-builder {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .checklist-builder-item {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .checklist-builder-item input {
+      flex: 1;
+    }
+    .checklist-delete-btn {
+      background: transparent;
+      border: none;
+      color: #ef4444;
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    /* ==========================================================================
+       Dropdown Menus & Popovers
+       ========================================================================== */
+    .dropdown-menu {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      background: white;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
+      min-width: 200px;
+      padding: 6px;
+      z-index: 120;
+      display: none;
+      flex-direction: column;
+    }
+    body.theme-dark .dropdown-menu {
+      background: #1e293b;
+      border-color: #334155;
+    }
+    .dropdown-menu.show {
+      display: flex;
+    }
+
+    .dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-main);
+      cursor: pointer;
+      background: transparent;
+      border: none;
+      width: 100%;
+      text-align: left;
+      transition: background 0.15s;
+      font-family: inherit;
+    }
+    .dropdown-item:hover {
+      background: #f1f5f9;
+      color: var(--primary);
+    }
+    body.theme-dark .dropdown-item {
+      color: #f8fafc;
+    }
+    body.theme-dark .dropdown-item:hover {
+      background: #334155;
+    }
+    .dropdown-divider {
+      height: 1px;
+      background: var(--border-color);
+      margin: 4px 0;
+    }
+
+    /* ==========================================================================
+       Toast Notifications
+       ========================================================================== */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 300;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+    }
+
+    .toast {
+      background: #1e293b;
+      color: white;
+      padding: 10px 20px;
+      border-radius: var(--radius-full);
+      font-size: 0.85rem;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      pointer-events: auto;
+      animation: toastIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    @keyframes toastIn {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* Lightbox for Images */
+    .lightbox-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.88);
+      z-index: 400;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      cursor: zoom-out;
+      padding: 24px;
+    }
+    .lightbox-overlay.active {
+      display: flex;
+    }
+    .lightbox-img {
+      max-width: 90vw;
+      max-height: 90vh;
+      border-radius: var(--radius-md);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Empty state */
+    .empty-state {
+      grid-column: 1 / -1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+      text-align: center;
+      gap: 12px;
+    }
+    .empty-state svg {
+      width: 64px;
+      height: 64px;
+      color: var(--text-light);
+    }
+
+    /* ==========================================================================
+       Responsive Breakpoints
+       ========================================================================== */
+    @media (max-width: 860px) {
+      .header {
+        padding: 0 12px;
+      }
+      .board-subtitle {
+        display: none;
+      }
+      .search-input {
+        width: 130px;
+      }
+      .search-input:focus {
+        width: 160px;
+      }
+      .view-tab span {
+        display: none;
+      }
+      .view-tab {
+        padding: 6px 10px;
+      }
+      .btn-primary span {
+        display: none;
+      }
+      .btn-primary {
+        padding: 8px 12px;
+      }
+    }
+
+    @media (max-width: 580px) {
+      .filter-bar {
+        padding: 6px 12px;
+      }
+      .board-viewport {
+        padding: 16px 12px;
+      }
+      .fab-btn {
+        bottom: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+      }
+    }
+  </style>
+</head>
+<body class="theme-pastel">
+
+  <!-- ========================================================================
+       Top Navigation Header
+       ======================================================================== -->
+  <header class="header">
+    <div class="header-left">
+      <div class="logo-badge" title="Padlet MVP" id="logoBtn">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+          <path d="M2 17l10 5 10-5"></path>
+          <path d="M2 12l10 5 10-5"></path>
+        </svg>
+      </div>
+      <div class="board-info">
+        <div class="board-title-wrapper">
+          <span class="board-title" id="boardTitleDisplay" title="クリックしてタイトルを変更">💡 プロジェクト・ブレインストーミング</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity: 0.5;">
+            <path d="M12 20h9"></path>
+            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+          </svg>
+        </div>
+        <span class="board-subtitle" id="boardDescDisplay">アイデアや画像を自由に投稿してリアルタイムに整理しましょう</span>
+      </div>
+    </div>
+
+    <!-- Center Layout Tabs -->
+    <div class="view-switcher">
+      <button class="view-tab active" data-view="wall" title="ウォール（グリッド配置）">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="7" height="7" rx="1"></rect>
+          <rect x="14" y="3" width="7" height="7" rx="1"></rect>
+          <rect x="14" y="14" width="7" height="7" rx="1"></rect>
+          <rect x="3" y="14" width="7" height="7" rx="1"></rect>
+        </svg>
+        <span>ウォール</span>
+      </button>
+      <button class="view-tab" data-view="sections" title="セクション（列・カンバン）">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="5" height="18" rx="1"></rect>
+          <rect x="10.5" y="3" width="5" height="18" rx="1"></rect>
+          <rect x="18" y="3" width="5" height="18" rx="1"></rect>
+        </svg>
+        <span>セクション</span>
+      </button>
+      <button class="view-tab" data-view="canvas" title="キャンバス（自由配置・ドラッグ）">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path>
+        </svg>
+        <span>キャンバス</span>
+      </button>
+    </div>
+
+    <!-- Header Actions -->
+    <div class="header-right">
+      <div class="search-box">
+        <span class="search-icon">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </span>
+        <input type="text" class="search-input" id="searchInput" placeholder="検索...">
+      </div>
+
+      <!-- Wallpaper theme button -->
+      <div style="position: relative;">
+        <button class="btn-icon" id="themeBtn" title="背景テーマを変更">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M12 2a7 7 0 0 0 0 14v6"></path>
+          </svg>
+        </button>
+        <div class="dropdown-menu" id="themeMenu">
+          <div style="padding: 6px 12px; font-size: 0.75rem; font-weight: 700; color: var(--text-muted);">背景テーマを選択</div>
+          <button class="dropdown-item" data-theme="theme-pastel">🌸 パステルグラデーション</button>
+          <button class="dropdown-item" data-theme="theme-corkboard">🪵 コルクボード</button>
+          <button class="dropdown-item" data-theme="theme-blueprint">📐 ブループリント方眼</button>
+          <button class="dropdown-item" data-theme="theme-sunset">🌅 サンセット</button>
+          <button class="dropdown-item" data-theme="theme-mint">🌿 ミントガーデン</button>
+          <button class="dropdown-item" data-theme="theme-dark">🌌 ダークネオン</button>
+          <button class="dropdown-item" data-theme="theme-minimal">⚪ ミニマルホワイト</button>
+        </div>
+      </div>
+
+      <!-- More options button (Export/Import/Reset) -->
+      <div style="position: relative;">
+        <button class="btn-icon" id="moreBtn" title="データ操作・共有">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="1"></circle>
+            <circle cx="19" cy="12" r="1"></circle>
+            <circle cx="5" cy="12" r="1"></circle>
+          </svg>
+        </button>
+        <div class="dropdown-menu" id="moreMenu">
+          <button class="dropdown-item" id="shareBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="18" cy="5" r="3"></circle>
+              <circle cx="6" cy="12" r="3"></circle>
+              <circle cx="18" cy="19" r="3"></circle>
+              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+              <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+            </svg>
+            リンクを共有
+          </button>
+          <button class="dropdown-item" id="exportBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            JSONエクスポート
+          </button>
+          <button class="dropdown-item" id="importBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            JSONインポート
+          </button>
+          <div class="dropdown-divider"></div>
+          <button class="dropdown-item" id="resetDemoBtn" style="color: #ef4444;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 2v6h6"></path>
+              <path d="M21 12A9 9 0 0 0 6 5.3L3 8"></path>
+              <path d="M21 22v-6h-6"></path>
+              <path d="M3 12a9 9 0 0 0 15 6.7l3-2.7"></path>
+            </svg>
+            初期サンプルに戻す
+          </button>
+        </div>
+      </div>
+
+      <!-- Add Post Button -->
+      <button class="btn-primary" id="headerAddBtn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        <span>投稿する</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       Filter / Tag / Color bar
+       ======================================================================== -->
+  <div class="filter-bar">
+    <div class="filter-pills">
+      <span class="filter-label">カラー絞り込み:</span>
+      <button class="color-pill active" data-color="all" style="background: #94a3b8;" title="すべて"></button>
+      <button class="color-pill" data-color="yellow" style="background: #fde68a;" title="イエロー"></button>
+      <button class="color-pill" data-color="rose" style="background: #fecdd3;" title="ローズ"></button>
+      <button class="color-pill" data-color="mint" style="background: #a7f3d0;" title="ミント"></button>
+      <button class="color-pill" data-color="blue" style="background: #bfdbfe;" title="ブルー"></button>
+      <button class="color-pill" data-color="purple" style="background: #ddd6fe;" title="パープル"></button>
+      <button class="color-pill" data-color="white" style="background: #ffffff; border: 1px solid #cbd5e1;" title="ホワイト"></button>
+      <button class="color-pill" data-color="dark" style="background: #1e293b;" title="ダーク"></button>
+    </div>
+    <div class="stat-badge">
+      <span id="cardCountDisplay">0 件のカード</span>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       Board Main Viewport
+       ======================================================================== -->
+  <main class="board-viewport" id="boardViewport">
+    <!-- Active view container will be rendered dynamically -->
+    <div id="viewContainer" class="view-wall"></div>
+  </main>
+
+  <!-- Canvas mode hint -->
+  <div class="canvas-hint" id="canvasHint" style="display: none;">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"></circle>
+      <line x1="12" y1="16" x2="12" y2="12"></line>
+      <line x1="12" y1="8" x2="12.01" y2="8"></line>
+    </svg>
+    空いている場所をダブルクリックしてカードを作成、またはドラッグして自由に移動できます
+  </div>
+
+  <!-- ========================================================================
+       Floating Action Button (+)
+       ======================================================================== -->
+  <button class="fab-btn" id="fabBtn" title="新しいカードを追加 (Ctrl+N)">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
+      <line x1="12" y1="5" x2="12" y2="19"></line>
+      <line x1="5" y1="12" x2="19" y2="12"></line>
+    </svg>
+  </button>
+
+  <!-- ========================================================================
+       Post Creation / Editing Modal
+       ======================================================================== -->
+  <div class="modal-overlay" id="postModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="postModalTitle">新規カードを作成</h3>
+        <button class="modal-close-btn" id="closePostModalBtn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <form id="postForm" class="modal-body">
+        <input type="hidden" id="cardIdInput">
+
+        <!-- Title -->
+        <div class="form-group">
+          <label class="form-label" for="cardTitleInput">タイトル</label>
+          <input type="text" id="cardTitleInput" class="form-input" placeholder="魅力的なタイトル..." required autofocus>
+        </div>
+
+        <!-- Section / Column -->
+        <div class="form-group">
+          <label class="form-label" for="cardSectionSelect">セクション</label>
+          <select id="cardSectionSelect" class="form-select"></select>
+        </div>
+
+        <!-- Body / Content -->
+        <div class="form-group">
+          <label class="form-label" for="cardContentInput">メモ / 詳細</label>
+          <textarea id="cardContentInput" class="form-textarea" placeholder="アイデアやメモ、URL、要点を記入..."></textarea>
+        </div>
+
+        <!-- Color Palette -->
+        <div class="form-group">
+          <label class="form-label">カードの色</label>
+          <div class="color-swatches" id="colorSwatches">
+            <div class="color-swatch-item selected" data-card-color="yellow" style="background: #fef08a;" title="イエロー"></div>
+            <div class="color-swatch-item" data-card-color="rose" style="background: #fecdd3;" title="ローズ"></div>
+            <div class="color-swatch-item" data-card-color="mint" style="background: #a7f3d0;" title="ミント"></div>
+            <div class="color-swatch-item" data-card-color="blue" style="background: #bfdbfe;" title="ブルー"></div>
+            <div class="color-swatch-item" data-card-color="purple" style="background: #ddd6fe;" title="パープル"></div>
+            <div class="color-swatch-item" data-card-color="orange" style="background: #fed7aa;" title="オレンジ"></div>
+            <div class="color-swatch-item" data-card-color="white" style="background: #ffffff; border: 1px solid #cbd5e1;" title="ホワイト"></div>
+            <div class="color-swatch-item" data-card-color="dark" style="background: #1e293b;" title="ダーク"></div>
+          </div>
+        </div>
+
+        <!-- Media Attachment Options -->
+        <div class="form-group">
+          <label class="form-label">画像を追加</label>
+          <div style="display: flex; gap: 8px;">
+            <input type="url" id="cardImageUrlInput" class="form-input" placeholder="画像URL (https://...)">
+            <label class="btn-secondary" style="white-space: nowrap; display: flex; align-items: center; gap: 6px; cursor: pointer;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+              <span>アップロード</span>
+              <input type="file" id="cardImageFileInput" accept="image/*" style="display: none;">
+            </label>
+          </div>
+          <div class="preview-image-wrap" id="imagePreviewWrap">
+            <img id="imagePreviewImg" src="" alt="プレビュー">
+            <button type="button" class="preview-remove-btn" id="removeImageBtn" title="画像を削除">✕</button>
+          </div>
+        </div>
+
+        <!-- Link Bookmark -->
+        <div class="form-group">
+          <label class="form-label">関連リンク (オプション)</label>
+          <input type="url" id="cardLinkInput" class="form-input" placeholder="https://example.com">
+        </div>
+
+        <!-- Checklist Builder -->
+        <div class="form-group">
+          <div class="form-label">
+            <span>チェックリスト (ToDo)</span>
+            <button type="button" class="btn-secondary" id="addChecklistItemBtn" style="padding: 2px 8px; font-size: 0.75rem;">+ 項目追加</button>
+          </div>
+          <div class="checklist-builder" id="checklistBuilder"></div>
+        </div>
+
+        <!-- Tags -->
+        <div class="form-group">
+          <label class="form-label" for="cardTagsInput">タグ (カンマ区切り)</label>
+          <input type="text" id="cardTagsInput" class="form-input" placeholder="デザイン, アイデア, 優先">
+        </div>
+
+        <!-- Pin to Top -->
+        <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
+          <input type="checkbox" id="cardPinnedInput" style="accent-color: var(--primary); width: 18px; height: 18px; cursor: pointer;">
+          <label for="cardPinnedInput" style="font-size: 0.88rem; font-weight: 600; cursor: pointer;">一番上に固定する 📌</label>
+        </div>
+      </form>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" id="cancelPostModalBtn">キャンセル</button>
+        <button type="submit" form="postForm" class="btn-primary" id="savePostBtn">保存する</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       Board Title Edit Modal
+       ======================================================================== -->
+  <div class="modal-overlay" id="titleModal">
+    <div class="modal-content" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3 class="modal-title">掲示板の情報を編集</h3>
+        <button class="modal-close-btn" id="closeTitleModalBtn">✕</button>
+      </div>
+      <form id="titleForm" class="modal-body">
+        <div class="form-group">
+          <label class="form-label" for="boardTitleInput">ボードタイトル</label>
+          <input type="text" id="boardTitleInput" class="form-input" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="boardDescInput">サブタイトル / 説明</label>
+          <input type="text" id="boardDescInput" class="form-input">
+        </div>
+      </form>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" id="cancelTitleModalBtn">キャンセル</button>
+        <button type="submit" form="titleForm" class="btn-primary">変更を保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden File Input for JSON Import -->
+  <input type="file" id="importFileInput" accept=".json" style="display: none;">
+
+  <!-- Image Lightbox Modal -->
+  <div class="lightbox-overlay" id="lightboxOverlay">
+    <img class="lightbox-img" id="lightboxImg" src="" alt="拡大画像">
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- ========================================================================
+       Application JavaScript
+       ======================================================================== -->
+  <script>
+    (function () {
+      'use strict';
+
+      // ======================================================================
+      // Demo Starter Data
+      // ======================================================================
+      const DEMO_DATA = {
+        title: "💡 プロジェクト・ブレインストーミング",
+        description: "アイデアや画像を自由に投稿してリアルタイムに整理しましょう",
+        theme: "theme-pastel",
+        sections: [
+          { id: "sec-ideas", title: "💡 アイデア・ひらめき" },
+          { id: "sec-doing", title: "🏃‍♂️ 進行中 / 検証中" },
+          { id: "sec-done",  title: "✅ 完了 / 決定事項" },
+          { id: "sec-links", title: "📚 リソース & リンク" }
+        ],
+        cards: [
+          {
+            id: "card-welcome",
+            sectionId: "sec-ideas",
+            title: "🎉 Padlet MVP へようこそ！",
+            content: "これは直感的なオンライン掲示板です。\n\n• 右下の「+」ボタン、または画面上のボタンからカードを追加\n• 上部のタブで「ウォール」「セクション」「キャンバス」表示を切り替え可能！\n• キャンバスモードではカードを自由にドラッグして配置できます ✨",
+            color: "yellow",
+            imageUrl: "",
+            linkUrl: "",
+            tags: ["使い方", "Padlet"],
+            pinned: true,
+            likes: 12,
+            isLiked: true,
+            createdAt: new Date(Date.now() - 3600000 * 2).toISOString(),
+            canvasX: 80,
+            canvasY: 80,
+            checklist: [
+              { id: "c1", text: "右下の「+」から新しいカードを投稿してみる", done: true },
+              { id: "c2", text: "上部のテーマアイコンから背景を変えてみる", done: false },
+              { id: "c3", text: "「セクション」表示でドラッグ&ドロップを試す", done: false }
+            ],
+            comments: [
+              { author: "佐藤 (デザイン)", text: "とても直感的で使いやすいですね！", time: "1時間前" },
+              { author: "田中 (PM)", text: "次のミーティングのブレストにも使いましょう！", time: "30分前" }
+            ]
+          },
+          {
+            id: "card-inspiration",
+            sectionId: "sec-ideas",
+            title: "🎨 デザインのインスピレーション",
+            content: "ミニマルで清潔感のあるUIコンポーネント。パステルカラーのアクセントと適度な余白が好印象です。",
+            color: "rose",
+            imageUrl: "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?w=800&auto=format&fit=crop&q=80",
+            linkUrl: "https://dribbble.com",
+            tags: ["UIデザイン", "参考画像"],
+            pinned: false,
+            likes: 8,
+            isLiked: false,
+            createdAt: new Date(Date.now() - 3600000 * 5).toISOString(),
+            canvasX: 420,
+            canvasY: 100,
+            checklist: [],
+            comments: []
+          },
+          {
+            id: "card-dev-tasks",
+            sectionId: "sec-doing",
+            title: "🚀 リリース準備チェックリスト",
+            content: "本番公開に向けたタスク項目です。チェックボックスはクリックしてそのまま切り替えられます。",
+            color: "mint",
+            imageUrl: "",
+            linkUrl: "",
+            tags: ["開発", "タスク"],
+            pinned: true,
+            likes: 5,
+            isLiked: false,
+            createdAt: new Date(Date.now() - 3600000 * 8).toISOString(),
+            canvasX: 80,
+            canvasY: 480,
+            checklist: [
+              { id: "t1", text: "GitHub Pagesの自動デプロイ設定", done: true },
+              { id: "t2", text: "モバイル / タブレットのレスポンシブ対応", done: true },
+              { id: "t3", text: "ドラッグ&ドロップの挙動確認", done: true },
+              { id: "t4", text: "チームメンバーへのURL共有", done: false }
+            ],
+            comments: []
+          },
+          {
+            id: "card-resource",
+            sectionId: "sec-links",
+            title: "📚 公式ドキュメント & ガイド",
+            content: "MDN Web Docsやモダンフロントエンドの最新プラクティス集です。困ったらここを参照！",
+            color: "blue",
+            imageUrl: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&auto=format&fit=crop&q=80",
+            linkUrl: "https://developer.mozilla.org/ja/",
+            tags: ["ドキュメント", "参考リンク"],
+            pinned: false,
+            likes: 7,
+            isLiked: false,
+            createdAt: new Date(Date.now() - 3600000 * 20).toISOString(),
+            canvasX: 760,
+            canvasY: 120,
+            checklist: [],
+            comments: [
+              { author: "エンジニアA", text: "いつもお世話になってます！", time: "昨日" }
+            ]
+          },
+          {
+            id: "card-release-done",
+            sectionId: "sec-done",
+            title: "✨ Padlet MVP コア機能の実装完了",
+            content: "ウォール・セクション・キャンバスの3つのビューモード、カラーパレット、リアルタイム検索、ローカル保存が全て稼働中！",
+            color: "purple",
+            imageUrl: "",
+            linkUrl: "",
+            tags: ["マイルストーン", "完了"],
+            pinned: false,
+            likes: 19,
+            isLiked: true,
+            createdAt: new Date(Date.now() - 3600000 * 24).toISOString(),
+            canvasX: 420,
+            canvasY: 520,
+            checklist: [],
+            comments: []
+          }
+        ]
+      };
+
+      // ======================================================================
+      // App State
+      // ======================================================================
+      const STORAGE_KEY = "padlet_mvp_store_v1";
+
+      let state = {
+        title: DEMO_DATA.title,
+        description: DEMO_DATA.description,
+        theme: DEMO_DATA.theme,
+        currentView: "wall", // "wall" | "sections" | "canvas"
+        searchQuery: "",
+        colorFilter: "all",
+        sections: [...DEMO_DATA.sections],
+        cards: [...DEMO_DATA.cards],
+        editingCardId: null,
+        activeImageBase64: ""
+      };
+
+      // Load from LocalStorage
+      function loadFromStorage() {
+        try {
+          const saved = localStorage.getItem(STORAGE_KEY);
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            state = { ...state, ...parsed };
+          }
+        } catch (e) {
+          console.error("Failed to load local storage:", e);
+        }
+      }
+
+      // Save to LocalStorage
+      function saveToStorage() {
+        try {
+          const dataToSave = {
+            title: state.title,
+            description: state.description,
+            theme: state.theme,
+            currentView: state.currentView,
+            sections: state.sections,
+            cards: state.cards
+          };
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
+        } catch (e) {
+          console.error("Failed to save local storage:", e);
+        }
+      }
+
+      // ======================================================================
+      // DOM Elements
+      // ======================================================================
+      const body = document.body;
+      const boardTitleDisplay = document.getElementById("boardTitleDisplay");
+      const boardDescDisplay = document.getElementById("boardDescDisplay");
+      const viewContainer = document.getElementById("viewContainer");
+      const boardViewport = document.getElementById("boardViewport");
+      const viewTabs = document.querySelectorAll(".view-tab");
+      const searchInput = document.getElementById("searchInput");
+      const colorPills = document.querySelectorAll(".color-pill");
+      const cardCountDisplay = document.getElementById("cardCountDisplay");
+      const canvasHint = document.getElementById("canvasHint");
+
+      // Modals
+      const postModal = document.getElementById("postModal");
+      const postForm = document.getElementById("postForm");
+      const postModalTitle = document.getElementById("postModalTitle");
+      const cardIdInput = document.getElementById("cardIdInput");
+      const cardTitleInput = document.getElementById("cardTitleInput");
+      const cardSectionSelect = document.getElementById("cardSectionSelect");
+      const cardContentInput = document.getElementById("cardContentInput");
+      const cardImageUrlInput = document.getElementById("cardImageUrlInput");
+      const cardImageFileInput = document.getElementById("cardImageFileInput");
+      const cardLinkInput = document.getElementById("cardLinkInput");
+      const cardTagsInput = document.getElementById("cardTagsInput");
+      const cardPinnedInput = document.getElementById("cardPinnedInput");
+      const colorSwatches = document.getElementById("colorSwatches");
+      const imagePreviewWrap = document.getElementById("imagePreviewWrap");
+      const imagePreviewImg = document.getElementById("imagePreviewImg");
+      const removeImageBtn = document.getElementById("removeImageBtn");
+      const checklistBuilder = document.getElementById("checklistBuilder");
+      const addChecklistItemBtn = document.getElementById("addChecklistItemBtn");
+
+      // Title Edit Modal
+      const titleModal = document.getElementById("titleModal");
+      const titleForm = document.getElementById("titleForm");
+      const boardTitleInput = document.getElementById("boardTitleInput");
+      const boardDescInput = document.getElementById("boardDescInput");
+
+      // Menus
+      const themeBtn = document.getElementById("themeBtn");
+      const themeMenu = document.getElementById("themeMenu");
+      const moreBtn = document.getElementById("moreBtn");
+      const moreMenu = document.getElementById("moreMenu");
+      const headerAddBtn = document.getElementById("headerAddBtn");
+      const fabBtn = document.getElementById("fabBtn");
+      const shareBtn = document.getElementById("shareBtn");
+      const exportBtn = document.getElementById("exportBtn");
+      const importBtn = document.getElementById("importBtn");
+      const importFileInput = document.getElementById("importFileInput");
+      const resetDemoBtn = document.getElementById("resetDemoBtn");
+
+      // Lightbox
+      const lightboxOverlay = document.getElementById("lightboxOverlay");
+      const lightboxImg = document.getElementById("lightboxImg");
+
+      // Toast
+      const toastContainer = document.getElementById("toastContainer");
+
+      // ======================================================================
+      // Utility Functions
+      // ======================================================================
+      function showToast(message, icon = "✨") {
+        const toast = document.createElement("div");
+        toast.className = "toast";
+        toast.innerHTML = `<span>${icon}</span><span>${escapeHtml(message)}</span>`;
+        toastContainer.appendChild(toast);
+        setTimeout(() => {
+          toast.style.opacity = "0";
+          toast.style.transform = "translateY(10px)";
+          toast.style.transition = "all 0.25s";
+          setTimeout(() => toast.remove(), 250);
+        }, 2800);
+      }
+
+      function escapeHtml(str) {
+        if (!str) return "";
+        return str
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      function formatRelativeTime(isoString) {
+        if (!isoString) return "たった今";
+        const now = new Date();
+        const past = new Date(isoString);
+        const diffMs = now - past;
+        const diffSec = Math.floor(diffMs / 1000);
+        const diffMin = Math.floor(diffSec / 60);
+        const diffHour = Math.floor(diffMin / 60);
+        const diffDay = Math.floor(diffHour / 24);
+
+        if (diffSec < 60) return "たった今";
+        if (diffMin < 60) return `${diffMin}分前`;
+        if (diffHour < 24) return `${diffHour}時間前`;
+        if (diffDay < 7) return `${diffDay}日前`;
+        return past.toLocaleDateString("ja-JP");
+      }
+
+      function generateId(prefix = "item") {
+        return `${prefix}-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
+      }
+
+      // ======================================================================
+      // Render Functions
+      // ======================================================================
+      function applyTheme(themeName) {
+        const themes = ["theme-pastel", "theme-corkboard", "theme-blueprint", "theme-sunset", "theme-mint", "theme-dark", "theme-minimal"];
+        themes.forEach(t => body.classList.remove(t));
+        body.classList.add(themeName);
+        state.theme = themeName;
+        saveToStorage();
+      }
+
+      function getFilteredCards() {
+        return state.cards.filter(card => {
+          // Color filter
+          if (state.colorFilter !== "all" && card.color !== state.colorFilter) {
+            return false;
+          }
+          // Search query
+          if (state.searchQuery) {
+            const q = state.searchQuery.toLowerCase();
+            const titleMatch = (card.title || "").toLowerCase().includes(q);
+            const contentMatch = (card.content || "").toLowerCase().includes(q);
+            const tagMatch = (card.tags || []).some(t => t.toLowerCase().includes(q));
+            const commentMatch = (card.comments || []).some(c => (c.text || "").toLowerCase().includes(q));
+            if (!titleMatch && !contentMatch && !tagMatch && !commentMatch) {
+              return false;
+            }
+          }
+          return true;
+        });
+      }
+
+      function renderApp() {
+        // Update header info
+        boardTitleDisplay.textContent = state.title;
+        boardDescDisplay.textContent = state.description;
+
+        // Update view tabs
+        viewTabs.forEach(tab => {
+          if (tab.dataset.view === state.currentView) {
+            tab.classList.add("active");
+          } else {
+            tab.classList.remove("active");
+          }
+        });
+
+        // Toggle canvas hint
+        if (state.currentView === "canvas") {
+          canvasHint.style.display = "flex";
+        } else {
+          canvasHint.style.display = "none";
+        }
+
+        // Apply theme
+        applyTheme(state.theme || "theme-pastel");
+
+        // Filter cards
+        const filteredCards = getFilteredCards();
+        cardCountDisplay.textContent = `${filteredCards.length} 件のカード`;
+
+        // Render based on current view
+        viewContainer.className = `view-${state.currentView}`;
+        viewContainer.innerHTML = "";
+
+        if (state.currentView === "wall") {
+          renderWallView(filteredCards);
+        } else if (state.currentView === "sections") {
+          renderSectionsView(filteredCards);
+        } else if (state.currentView === "canvas") {
+          renderCanvasView(filteredCards);
+        }
+      }
+
+      // 1. Render Wall View (Masonry-like responsive grid)
+      function renderWallView(cards) {
+        if (cards.length === 0) {
+          viewContainer.innerHTML = `
+            <div class="empty-state">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                <polyline points="21 15 16 10 5 21"></polyline>
+              </svg>
+              <h3>カードが見つかりません</h3>
+              <p>検索条件を変更するか、右下の「+」ボタンから新しいカードを投稿しましょう！</p>
+            </div>
+          `;
+          return;
+        }
+
+        // Sort: pinned cards first
+        const sorted = [...cards].sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
+        sorted.forEach(card => {
+          const cardEl = createCardElement(card, false);
+          viewContainer.appendChild(cardEl);
+        });
+      }
+
+      // 2. Render Sections View (Kanban style columns)
+      function renderSectionsView(cards) {
+        state.sections.forEach(sec => {
+          const secCards = cards.filter(c => c.sectionId === sec.id);
+
+          const colEl = document.createElement("div");
+          colEl.className = "section-column";
+          colEl.dataset.sectionId = sec.id;
+
+          // Drag and drop events for column
+          colEl.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            colEl.classList.add("drag-over");
+          });
+          colEl.addEventListener("dragleave", () => {
+            colEl.classList.remove("drag-over");
+          });
+          colEl.addEventListener("drop", (e) => {
+            e.preventDefault();
+            colEl.classList.remove("drag-over");
+            const draggedCardId = e.dataTransfer.getData("text/plain");
+            if (draggedCardId) {
+              moveCardToSection(draggedCardId, sec.id);
+            }
+          });
+
+          colEl.innerHTML = `
+            <div class="section-header">
+              <div class="section-title">
+                <span>${escapeHtml(sec.title)}</span>
+                <span class="section-count">${secCards.length}</span>
+              </div>
+              <button class="card-menu-btn delete-sec-btn" title="セクションを削除" data-sec-id="${sec.id}">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+            <div class="section-cards-list" id="sec-list-${sec.id}"></div>
+            <button class="section-add-card-btn" data-sec-id="${sec.id}">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              カードを追加
+            </button>
+          `;
+
+          const listEl = colEl.querySelector(`#sec-list-${sec.id}`);
+          secCards.forEach(card => {
+            const cardEl = createCardElement(card, true);
+            listEl.appendChild(cardEl);
+          });
+
+          // Delete section handler
+          colEl.querySelector(".delete-sec-btn").addEventListener("click", (e) => {
+            e.stopPropagation();
+            if (state.sections.length <= 1) {
+              showToast("最低1つのセクションが必要です", "⚠️");
+              return;
+            }
+            if (confirm(`セクション「${sec.title}」を削除しますか？\n（含まれるカードは他のセクションへ移動します）`)) {
+              deleteSection(sec.id);
+            }
+          });
+
+          // Add card to this section handler
+          colEl.querySelector(".section-add-card-btn").addEventListener("click", () => {
+            openPostModal(null, sec.id);
+          });
+
+          viewContainer.appendChild(colEl);
+        });
+
+        // "Add Section" Column
+        const addCol = document.createElement("div");
+        addCol.className = "add-section-col";
+        addCol.innerHTML = `
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          <span>新しいセクションを追加</span>
+        `;
+        addCol.addEventListener("click", () => {
+          const title = prompt("新しいセクション名を入力してください:", "新セクション");
+          if (title && title.trim()) {
+            state.sections.push({
+              id: generateId("sec"),
+              title: title.trim()
+            });
+            saveToStorage();
+            renderApp();
+            showToast("セクションを追加しました");
+          }
+        });
+        viewContainer.appendChild(addCol);
+      }
+
+      // 3. Render Canvas View (Freeform X/Y placement)
+      function renderCanvasView(cards) {
+        cards.forEach(card => {
+          const cardEl = createCardElement(card, false, true);
+          // Set position
+          cardEl.style.left = `${card.canvasX || 60}px`;
+          cardEl.style.top = `${card.canvasY || 60}px`;
+          setupCanvasDragging(cardEl, card);
+          viewContainer.appendChild(cardEl);
+        });
+
+        // Double click anywhere on canvas to create note at that position
+        viewContainer.ondblclick = (e) => {
+          if (e.target === viewContainer) {
+            const rect = viewContainer.getBoundingClientRect();
+            const x = e.clientX - rect.left + viewContainer.scrollLeft;
+            const y = e.clientY - rect.top + viewContainer.scrollTop;
+            openPostModal(null, null, { x: Math.max(20, Math.floor(x)), y: Math.max(20, Math.floor(y)) });
+          }
+        };
+      }
+
+      // Setup Canvas Freeform Dragging
+      function setupCanvasDragging(element, card) {
+        let isDragging = false;
+        let startX, startY;
+        let initialX, initialY;
+
+        element.addEventListener("mousedown", (e) => {
+          // Don't drag if clicking buttons, inputs, links, or comments
+          if (e.target.closest("button") || e.target.closest("input") || e.target.closest("a") || e.target.closest(".card-comments-drawer")) {
+            return;
+          }
+          isDragging = true;
+          element.classList.add("dragging");
+          startX = e.clientX;
+          startY = e.clientY;
+          initialX = element.offsetLeft;
+          initialY = element.offsetTop;
+
+          // Bring card to front
+          const allCards = document.querySelectorAll(".card.in-canvas");
+          allCards.forEach(c => c.style.zIndex = "10");
+          element.style.zIndex = "30";
+
+          function onMouseMove(ev) {
+            if (!isDragging) return;
+            const dx = ev.clientX - startX;
+            const dy = ev.clientY - startY;
+            const newX = Math.max(10, initialX + dx);
+            const newY = Math.max(10, initialY + dy);
+            element.style.left = `${newX}px`;
+            element.style.top = `${newY}px`;
+          }
+
+          function onMouseUp(ev) {
+            if (!isDragging) return;
+            isDragging = false;
+            element.classList.remove("dragging");
+            window.removeEventListener("mousemove", onMouseMove);
+            window.removeEventListener("mouseup", onMouseUp);
+
+            // Update card position in state
+            card.canvasX = element.offsetLeft;
+            card.canvasY = element.offsetTop;
+            saveToStorage();
+          }
+
+          window.addEventListener("mousemove", onMouseMove);
+          window.addEventListener("mouseup", onMouseUp);
+        });
+      }
+
+      // Move card to another section
+      function moveCardToSection(cardId, targetSectionId) {
+        const card = state.cards.find(c => c.id === cardId);
+        if (card && card.sectionId !== targetSectionId) {
+          card.sectionId = targetSectionId;
+          saveToStorage();
+          renderApp();
+          showToast("カードを移動しました");
+        }
+      }
+
+      // Delete section and migrate its cards
+      function deleteSection(secId) {
+        const remaining = state.sections.filter(s => s.id !== secId);
+        const fallbackSecId = remaining[0].id;
+        state.cards.forEach(c => {
+          if (c.sectionId === secId) {
+            c.sectionId = fallbackSecId;
+          }
+        });
+        state.sections = remaining;
+        saveToStorage();
+        renderApp();
+        showToast("セクションを削除しました");
+      }
+
+      // ======================================================================
+      // Create Individual Card DOM Element
+      // ======================================================================
+      function createCardElement(card, draggable = false, isCanvas = false) {
+        const el = document.createElement("div");
+        el.className = `card card-color-${card.color || 'yellow'}`;
+        el.id = card.id;
+
+        if (isCanvas) {
+          el.classList.add("in-canvas");
+        }
+
+        if (draggable) {
+          el.draggable = true;
+          el.addEventListener("dragstart", (e) => {
+            e.dataTransfer.setData("text/plain", card.id);
+            el.classList.add("dragging");
+          });
+          el.addEventListener("dragend", () => {
+            el.classList.remove("dragging");
+          });
+        }
+
+        // Section title badge
+        const section = state.sections.find(s => s.id === card.sectionId);
+        const sectionBadge = (state.currentView !== "sections" && section) 
+          ? `<span class="tag-chip" style="background: rgba(0,0,0,0.08); font-size: 0.68rem; margin-bottom: 4px;">📂 ${escapeHtml(section.title)}</span>`
+          : "";
+
+        // Pin badge
+        const pinBadge = card.pinned 
+          ? `<div class="card-pinned-badge" title="ピン留め済み">📌</div>`
+          : "";
+
+        // Image Attachment
+        let imageHtml = "";
+        if (card.imageUrl) {
+          imageHtml = `
+            <div class="card-image-wrap" data-img-url="${escapeHtml(card.imageUrl)}">
+              <img src="${escapeHtml(card.imageUrl)}" alt="${escapeHtml(card.title)}" class="card-image" loading="lazy">
+            </div>
+          `;
+        }
+
+        // Link Attachment
+        let linkHtml = "";
+        if (card.linkUrl) {
+          try {
+            const parsedUrl = new URL(card.linkUrl);
+            linkHtml = `
+              <a href="${escapeHtml(card.linkUrl)}" target="_blank" rel="noopener noreferrer" class="card-link-preview" title="${escapeHtml(card.linkUrl)}">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2">
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                </svg>
+                <span class="card-link-title">${escapeHtml(parsedUrl.hostname)}</span>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity: 0.5;">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                  <polyline points="15 3 21 3 21 9"></polyline>
+                  <line x1="10" y1="14" x2="21" y2="3"></line>
+                </svg>
+              </a>
+            `;
+          } catch(e) {}
+        }
+
+        // Checklist Items
+        let checklistHtml = "";
+        if (card.checklist && card.checklist.length > 0) {
+          checklistHtml = `
+            <div class="card-checklist">
+              ${card.checklist.map((item, idx) => `
+                <label class="checklist-item ${item.done ? 'done' : ''}" data-idx="${idx}">
+                  <input type="checkbox" ${item.done ? 'checked' : ''}>
+                  <span>${escapeHtml(item.text)}</span>
+                </label>
+              `).join("")}
+            </div>
+          `;
+        }
+
+        // Tags
+        let tagsHtml = "";
+        if (card.tags && card.tags.length > 0) {
+          tagsHtml = `
+            <div class="card-tags">
+              ${card.tags.map(tag => `<span class="tag-chip" data-tag="${escapeHtml(tag)}">#${escapeHtml(tag)}</span>`).join("")}
+            </div>
+          `;
+        }
+
+        // Comments count
+        const commentsCount = (card.comments || []).length;
+
+        // Card HTML Skeleton
+        el.innerHTML = `
+          ${pinBadge}
+          <div class="card-header">
+            <div class="card-user-info">
+              <div class="card-avatar">${(card.title || 'P').charAt(0).toUpperCase()}</div>
+              <div class="card-meta">
+                <span class="card-author">${escapeHtml(card.author || 'メンバー')}</span>
+                <span class="card-date">${formatRelativeTime(card.createdAt)}</span>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 2px;">
+              <button class="card-menu-btn edit-card-btn" title="編集">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+              </button>
+              <button class="card-menu-btn delete-card-btn" title="削除">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          ${imageHtml}
+
+          <div class="card-body">
+            ${sectionBadge}
+            <h4 class="card-title">${escapeHtml(card.title)}</h4>
+            ${card.content ? `<div class="card-content">${escapeHtml(card.content)}</div>` : ''}
+            ${linkHtml}
+            ${checklistHtml}
+            ${tagsHtml}
+          </div>
+
+          <div class="card-footer">
+            <div class="card-footer-left">
+              <button class="card-actions-btn like-btn ${card.isLiked ? 'liked' : ''}" title="いいね">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="${card.isLiked ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                </svg>
+                <span class="like-count">${card.likes || 0}</span>
+              </button>
+              <button class="card-actions-btn toggle-comments-btn" title="コメント">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <span>${commentsCount}</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Comments Drawer -->
+          <div class="card-comments-drawer" id="comments-${card.id}">
+            <div class="comments-list">
+              ${(card.comments || []).map(c => `
+                <div class="comment-item">
+                  <div class="card-avatar" style="width: 20px; height: 20px; font-size: 0.65rem;">${(c.author || 'M').charAt(0)}</div>
+                  <div>
+                    <span class="comment-author">${escapeHtml(c.author)}</span>
+                    <div class="comment-text">${escapeHtml(c.text)}</div>
+                  </div>
+                </div>
+              `).join("")}
+            </div>
+            <form class="comment-form">
+              <input type="text" class="comment-input" placeholder="コメントを入力..." required>
+              <button type="submit" class="comment-submit-btn" title="送信">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <line x1="22" y1="2" x2="11" y2="13"></line>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+              </button>
+            </form>
+          </div>
+        `;
+
+        // Event: Lightbox image zoom
+        const imgWrap = el.querySelector(".card-image-wrap");
+        if (imgWrap) {
+          imgWrap.addEventListener("click", () => {
+            lightboxImg.src = card.imageUrl;
+            lightboxOverlay.classList.add("active");
+          });
+        }
+
+        // Event: Checklist item toggle
+        el.querySelectorAll(".checklist-item input[type='checkbox']").forEach((cb, idx) => {
+          cb.addEventListener("change", (e) => {
+            e.stopPropagation();
+            if (card.checklist && card.checklist[idx]) {
+              card.checklist[idx].done = cb.checked;
+              saveToStorage();
+              renderApp();
+            }
+          });
+        });
+
+        // Event: Tag click to search filter
+        el.querySelectorAll(".tag-chip[data-tag]").forEach(chip => {
+          chip.addEventListener("click", (e) => {
+            e.stopPropagation();
+            searchInput.value = chip.dataset.tag;
+            state.searchQuery = chip.dataset.tag;
+            renderApp();
+          });
+        });
+
+        // Event: Like button
+        const likeBtn = el.querySelector(".like-btn");
+        likeBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          card.isLiked = !card.isLiked;
+          card.likes = (card.likes || 0) + (card.isLiked ? 1 : -1);
+          saveToStorage();
+          renderApp();
+        });
+
+        // Event: Toggle comments drawer
+        const toggleCommentsBtn = el.querySelector(".toggle-comments-btn");
+        const commentsDrawer = el.querySelector(".card-comments-drawer");
+        toggleCommentsBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          commentsDrawer.classList.toggle("open");
+        });
+
+        // Event: Add Comment
+        const commentForm = el.querySelector(".comment-form");
+        const commentInput = el.querySelector(".comment-input");
+        commentForm.addEventListener("submit", (e) => {
+          e.preventDefault();
+          const text = commentInput.value.trim();
+          if (!text) return;
+          if (!card.comments) card.comments = [];
+          card.comments.push({
+            author: "あなた",
+            text: text,
+            time: "たった今"
+          });
+          commentInput.value = "";
+          saveToStorage();
+          renderApp();
+          showToast("コメントを追加しました", "💬");
+        });
+
+        // Event: Edit Card
+        el.querySelector(".edit-card-btn").addEventListener("click", (e) => {
+          e.stopPropagation();
+          openPostModal(card);
+        });
+
+        // Event: Delete Card
+        el.querySelector(".delete-card-btn").addEventListener("click", (e) => {
+          e.stopPropagation();
+          if (confirm(`「${card.title}」を削除しますか？`)) {
+            state.cards = state.cards.filter(c => c.id !== card.id);
+            saveToStorage();
+            renderApp();
+            showToast("カードを削除しました", "🗑️");
+          }
+        });
+
+        return el;
+      }
+
+      // ======================================================================
+      // Modal Logic (Create & Edit Post)
+      // ======================================================================
+      let initialModalCoords = null;
+
+      function openPostModal(cardToEdit = null, defaultSecId = null, coords = null) {
+        state.editingCardId = cardToEdit ? cardToEdit.id : null;
+        initialModalCoords = coords;
+
+        // Populate sections dropdown
+        cardSectionSelect.innerHTML = state.sections.map(s => `
+          <option value="${s.id}">${escapeHtml(s.title)}</option>
+        `).join("");
+
+        // Reset checklist builder
+        checklistBuilder.innerHTML = "";
+
+        if (cardToEdit) {
+          postModalTitle.textContent = "カードを編集";
+          cardIdInput.value = cardToEdit.id;
+          cardTitleInput.value = cardToEdit.title || "";
+          cardSectionSelect.value = cardToEdit.sectionId || (state.sections[0] ? state.sections[0].id : "");
+          cardContentInput.value = cardToEdit.content || "";
+          cardImageUrlInput.value = cardToEdit.imageUrl || "";
+          cardLinkInput.value = cardToEdit.linkUrl || "";
+          cardTagsInput.value = (cardToEdit.tags || []).join(", ");
+          cardPinnedInput.checked = !!cardToEdit.pinned;
+
+          // Select color
+          selectColorSwatch(cardToEdit.color || "yellow");
+
+          // Image preview
+          if (cardToEdit.imageUrl) {
+            imagePreviewImg.src = cardToEdit.imageUrl;
+            imagePreviewWrap.style.display = "block";
+            state.activeImageBase64 = cardToEdit.imageUrl;
+          } else {
+            imagePreviewWrap.style.display = "none";
+            state.activeImageBase64 = "";
+          }
+
+          // Populate checklist builder
+          if (cardToEdit.checklist && cardToEdit.checklist.length > 0) {
+            cardToEdit.checklist.forEach(item => addChecklistInputRow(item.text, item.done));
+          }
+        } else {
+          postModalTitle.textContent = "新しいカードを投稿";
+          postForm.reset();
+          cardIdInput.value = "";
+          if (defaultSecId) {
+            cardSectionSelect.value = defaultSecId;
+          }
+          selectColorSwatch("yellow");
+          imagePreviewWrap.style.display = "none";
+          state.activeImageBase64 = "";
+        }
+
+        postModal.classList.add("active");
+        setTimeout(() => cardTitleInput.focus(), 150);
+      }
+
+      function closePostModal() {
+        postModal.classList.remove("active");
+        state.editingCardId = null;
+        state.activeImageBase64 = "";
+      }
+
+      function selectColorSwatch(color) {
+        document.querySelectorAll(".color-swatch-item").forEach(swatch => {
+          if (swatch.dataset.cardColor === color) {
+            swatch.classList.add("selected");
+          } else {
+            swatch.classList.remove("selected");
+          }
+        });
+      }
+
+      function getSelectedCardColor() {
+        const selected = document.querySelector(".color-swatch-item.selected");
+        return selected ? selected.dataset.cardColor : "yellow";
+      }
+
+      // Add row to checklist builder
+      function addChecklistInputRow(text = "", done = false) {
+        const row = document.createElement("div");
+        row.className = "checklist-builder-item";
+        row.innerHTML = `
+          <input type="checkbox" ${done ? 'checked' : ''} class="cb-done" style="accent-color: var(--primary);">
+          <input type="text" class="form-input cb-text" value="${escapeHtml(text)}" placeholder="項目名を入力...">
+          <button type="button" class="checklist-delete-btn" title="削除">✕</button>
+        `;
+        row.querySelector(".checklist-delete-btn").addEventListener("click", () => row.remove());
+        checklistBuilder.appendChild(row);
+      }
+
+      // Handle Image File Upload (Base64)
+      cardImageFileInput.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (file.size > 2 * 1024 * 1024) {
+          alert("画像ファイルサイズが2MBを超えています。より軽量な画像を選択してください。");
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          state.activeImageBase64 = ev.target.result;
+          imagePreviewImg.src = ev.target.result;
+          imagePreviewWrap.style.display = "block";
+          cardImageUrlInput.value = "";
+        };
+        reader.readAsDataURL(file);
+      });
+
+      // Handle Image URL input
+      cardImageUrlInput.addEventListener("input", () => {
+        const val = cardImageUrlInput.value.trim();
+        if (val) {
+          state.activeImageBase64 = val;
+          imagePreviewImg.src = val;
+          imagePreviewWrap.style.display = "block";
+        }
+      });
+
+      // Remove Image button
+      removeImageBtn.addEventListener("click", () => {
+        state.activeImageBase64 = "";
+        imagePreviewImg.src = "";
+        imagePreviewWrap.style.display = "none";
+        cardImageUrlInput.value = "";
+        cardImageFileInput.value = "";
+      });
+
+      // Post Form Submission
+      postForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const title = cardTitleInput.value.trim();
+        if (!title) return;
+
+        // Extract checklist
+        const checklistItems = [];
+        checklistBuilder.querySelectorAll(".checklist-builder-item").forEach(row => {
+          const text = row.querySelector(".cb-text").value.trim();
+          const done = row.querySelector(".cb-done").checked;
+          if (text) {
+            checklistItems.push({ id: generateId("chk"), text, done });
+          }
+        });
+
+        // Extract tags
+        const tags = cardTagsInput.value
+          .split(/[,、]/)
+          .map(t => t.trim().replace(/^#/, ""))
+          .filter(t => t.length > 0);
+
+        // Final image url
+        let finalImage = state.activeImageBase64 || cardImageUrlInput.value.trim();
+
+        if (state.editingCardId) {
+          // Edit existing card
+          const card = state.cards.find(c => c.id === state.editingCardId);
+          if (card) {
+            card.title = title;
+            card.sectionId = cardSectionSelect.value;
+            card.content = cardContentInput.value.trim();
+            card.color = getSelectedCardColor();
+            card.imageUrl = finalImage;
+            card.linkUrl = cardLinkInput.value.trim();
+            card.checklist = checklistItems;
+            card.tags = tags;
+            card.pinned = cardPinnedInput.checked;
+          }
+          showToast("カードを更新しました", "✏️");
+        } else {
+          // Create new card
+          const newCard = {
+            id: generateId("card"),
+            sectionId: cardSectionSelect.value || (state.sections[0] ? state.sections[0].id : "sec-default"),
+            title: title,
+            content: cardContentInput.value.trim(),
+            color: getSelectedCardColor(),
+            imageUrl: finalImage,
+            linkUrl: cardLinkInput.value.trim(),
+            checklist: checklistItems,
+            tags: tags,
+            pinned: cardPinnedInput.checked,
+            likes: 0,
+            isLiked: false,
+            createdAt: new Date().toISOString(),
+            canvasX: initialModalCoords ? initialModalCoords.x : (100 + Math.floor(Math.random() * 200)),
+            canvasY: initialModalCoords ? initialModalCoords.y : (100 + Math.floor(Math.random() * 200)),
+            comments: []
+          };
+          state.cards.unshift(newCard);
+          showToast("新しいカードを投稿しました！", "🎉");
+        }
+
+        saveToStorage();
+        closePostModal();
+        renderApp();
+      });
+
+      // ======================================================================
+      // Board Title & Description Edit
+      // ======================================================================
+      boardTitleDisplay.addEventListener("click", () => {
+        boardTitleInput.value = state.title;
+        boardDescInput.value = state.description;
+        titleModal.classList.add("active");
+        setTimeout(() => boardTitleInput.focus(), 150);
+      });
+
+      titleForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const t = boardTitleInput.value.trim();
+        if (t) {
+          state.title = t;
+          state.description = boardDescInput.value.trim();
+          saveToStorage();
+          renderApp();
+          titleModal.classList.remove("active");
+          showToast("ボード情報を更新しました", "📝");
+        }
+      });
+
+      // ======================================================================
+      // Event Listeners & Interactions
+      // ======================================================================
+
+      // Switch View Modes
+      viewTabs.forEach(tab => {
+        tab.addEventListener("click", () => {
+          state.currentView = tab.dataset.view;
+          saveToStorage();
+          renderApp();
+        });
+      });
+
+      // Search Filter
+      searchInput.addEventListener("input", (e) => {
+        state.searchQuery = e.target.value.trim();
+        renderApp();
+      });
+
+      // Color Filter Pills
+      colorPills.forEach(pill => {
+        pill.addEventListener("click", () => {
+          colorPills.forEach(p => p.classList.remove("active"));
+          pill.classList.add("active");
+          state.colorFilter = pill.dataset.color;
+          renderApp();
+        });
+      });
+
+      // Color swatches in modal
+      document.querySelectorAll(".color-swatch-item").forEach(swatch => {
+        swatch.addEventListener("click", () => {
+          selectColorSwatch(swatch.dataset.cardColor);
+        });
+      });
+
+      // Add Checklist item in modal
+      addChecklistItemBtn.addEventListener("click", () => addChecklistInputRow());
+
+      // Open Modal Buttons
+      headerAddBtn.addEventListener("click", () => openPostModal());
+      fabBtn.addEventListener("click", () => openPostModal());
+
+      // Close Modal Buttons
+      document.getElementById("closePostModalBtn").addEventListener("click", closePostModal);
+      document.getElementById("cancelPostModalBtn").addEventListener("click", closePostModal);
+      document.getElementById("closeTitleModalBtn").addEventListener("click", () => titleModal.classList.remove("active"));
+      document.getElementById("cancelTitleModalBtn").addEventListener("click", () => titleModal.classList.remove("active"));
+
+      // Close modals when clicking outside
+      postModal.addEventListener("click", (e) => {
+        if (e.target === postModal) closePostModal();
+      });
+      titleModal.addEventListener("click", (e) => {
+        if (e.target === titleModal) titleModal.classList.remove("active");
+      });
+
+      // Lightbox Close
+      lightboxOverlay.addEventListener("click", () => {
+        lightboxOverlay.classList.remove("active");
+      });
+
+      // Theme Dropdown Menu
+      themeBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        themeMenu.classList.toggle("show");
+        moreMenu.classList.remove("show");
+      });
+
+      document.querySelectorAll("[data-theme]").forEach(item => {
+        item.addEventListener("click", (e) => {
+          e.stopPropagation();
+          applyTheme(item.dataset.theme);
+          themeMenu.classList.remove("show");
+          showToast("背景テーマを変更しました", "🎨");
+        });
+      });
+
+      // More Options Dropdown
+      moreBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        moreMenu.classList.toggle("show");
+        themeMenu.classList.remove("show");
+      });
+
+      // Close dropdowns on outside click
+      window.addEventListener("click", () => {
+        themeMenu.classList.remove("show");
+        moreMenu.classList.remove("show");
+      });
+
+      // Share Board Button
+      shareBtn.addEventListener("click", () => {
+        moreMenu.classList.remove("show");
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(window.location.href).then(() => {
+            showToast("ボードのURLをコピーしました！", "🔗");
+          });
+        } else {
+          showToast("URL: " + window.location.href, "🔗");
+        }
+      });
+
+      // Export JSON
+      exportBtn.addEventListener("click", () => {
+        moreMenu.classList.remove("show");
+        const exportData = {
+          title: state.title,
+          description: state.description,
+          theme: state.theme,
+          sections: state.sections,
+          cards: state.cards,
+          exportedAt: new Date().toISOString()
+        };
+        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `padlet-backup-${new Date().toISOString().slice(0, 10)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast("データをJSONとしてダウンロードしました", "📥");
+      });
+
+      // Import JSON
+      importBtn.addEventListener("click", () => {
+        moreMenu.classList.remove("show");
+        importFileInput.click();
+      });
+
+      importFileInput.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          try {
+            const imported = JSON.parse(ev.target.result);
+            if (imported.cards && Array.isArray(imported.cards)) {
+              state.title = imported.title || state.title;
+              state.description = imported.description || state.description;
+              state.theme = imported.theme || state.theme;
+              state.sections = imported.sections || state.sections;
+              state.cards = imported.cards;
+              saveToStorage();
+              renderApp();
+              showToast("データを正常にインポートしました！", "✅");
+            } else {
+              alert("無効なPadletデータ形式です。");
+            }
+          } catch (err) {
+            alert("JSONの読み込みに失敗しました: " + err.message);
+          }
+        };
+        reader.readAsText(file);
+        importFileInput.value = "";
+      });
+
+      // Reset to Demo Data
+      resetDemoBtn.addEventListener("click", () => {
+        moreMenu.classList.remove("show");
+        if (confirm("すべてのカードと設定を初期のサンプル状態に復元しますか？")) {
+          state.title = DEMO_DATA.title;
+          state.description = DEMO_DATA.description;
+          state.theme = DEMO_DATA.theme;
+          state.sections = JSON.parse(JSON.stringify(DEMO_DATA.sections));
+          state.cards = JSON.parse(JSON.stringify(DEMO_DATA.cards));
+          state.currentView = "wall";
+          saveToStorage();
+          renderApp();
+          showToast("サンプルデータに復元しました", "🔄");
+        }
+      });
+
+      // Keyboard Shortcuts
+      window.addEventListener("keydown", (e) => {
+        // Ctrl/Cmd + N -> New Post
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "n") {
+          e.preventDefault();
+          openPostModal();
+        }
+        // Escape -> Close Modals
+        if (e.key === "Escape") {
+          if (lightboxOverlay.classList.contains("active")) {
+            lightboxOverlay.classList.remove("active");
+          } else if (postModal.classList.contains("active")) {
+            closePostModal();
+          } else if (titleModal.classList.contains("active")) {
+            titleModal.classList.remove("active");
+          }
+        }
+      });
+
+      // ======================================================================
+      // Initialize Application
+      // ======================================================================
+      loadFromStorage();
+      renderApp();
+      console.log("Padlet MVP loaded successfully.");
+    })();
+  </script>
+</body>
+</html>
