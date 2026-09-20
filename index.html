@@ -22,6 +22,10 @@
       --text-light: #94a3b8;
       --bg-header: rgba(255, 255, 255, 0.88);
       --border-color: rgba(226, 232, 240, 0.8);
+      --surface: rgba(255, 255, 255, 0.88);
+      --surface-strong: #ffffff;
+      --surface-hover: #f1f5f9;
+      --active-surface: #ffffff;
       --card-shadow: 0 4px 14px -2px rgba(0, 0, 0, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.04);
       --card-shadow-hover: 0 12px 24px -4px rgba(0, 0, 0, 0.12), 0 4px 8px -2px rgba(0, 0, 0, 0.06);
       --radius-sm: 8px;
@@ -77,6 +81,10 @@
     body.theme-dark, body.theme-blueprint {
       --bg-header: rgba(15, 23, 42, 0.88);
       --border-color: rgba(51, 65, 85, 0.8);
+      --surface: rgba(15, 23, 42, 0.92);
+      --surface-strong: #1e293b;
+      --surface-hover: #334155;
+      --active-surface: #f8fafc;
       --text-main: #f8fafc;
       --text-muted: #cbd5e1;
     }
@@ -106,12 +114,13 @@
       position: sticky;
       top: 0;
       z-index: 100;
-      height: var(--header-height);
+      min-height: var(--header-height);
       background: var(--bg-header);
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
       border-bottom: 1px solid var(--border-color);
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
       padding: 0 20px;
@@ -123,6 +132,16 @@
       display: flex;
       align-items: center;
       gap: 14px;
+      min-width: 0;
+      flex: 1 1 420px;
+    }
+
+    .header-mode-controls {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+      flex: 0 0 auto;
       min-width: 0;
     }
 
@@ -179,13 +198,36 @@
       text-overflow: ellipsis;
     }
 
+    .board-manager-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 36px;
+      padding: 6px 10px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      color: var(--text-main);
+      font: 600 0.78rem var(--font-family);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
+    }
+    .board-manager-btn:hover {
+      background: var(--surface-hover);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
     /* Center view tabs */
     .view-switcher {
       display: flex;
-      background: rgba(0, 0, 0, 0.06);
+      background: var(--surface);
       padding: 3px;
       border-radius: var(--radius-full);
       gap: 2px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12);
       flex-shrink: 0;
     }
 
@@ -205,13 +247,20 @@
       font-family: inherit;
     }
     .view-tab.active {
-      background: white;
-      color: var(--text-main);
+      background: var(--active-surface);
+      color: #0f172a;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(15, 23, 42, 0.22);
     }
-    body.theme-dark .view-tab.active {
-      background: #1e293b;
-      color: #fff;
+    body.theme-dark .view-tab.active,
+    body.theme-blueprint .view-tab.active {
+      background: #f8fafc;
+      color: #0f172a;
+      border-color: #f8fafc;
+    }
+    .view-tab:not(.active):hover {
+      background: var(--surface-hover);
+      color: var(--text-main);
     }
 
     /* Header Right Actions */
@@ -220,6 +269,8 @@
       align-items: center;
       gap: 10px;
       flex-shrink: 0;
+      flex-wrap: wrap;
+      justify-content: flex-end;
     }
 
     .search-box {
@@ -246,7 +297,8 @@
       border-color: var(--primary);
       box-shadow: 0 0 0 3px rgba(255, 64, 129, 0.15);
     }
-    body.theme-dark .search-input {
+    body.theme-dark .search-input,
+    body.theme-blueprint .search-input {
       background: #1e293b;
       border-color: #334155;
       color: white;
@@ -280,7 +332,8 @@
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
       color: var(--primary);
     }
-    body.theme-dark .btn-icon {
+    body.theme-dark .btn-icon,
+    body.theme-blueprint .btn-icon {
       background: #1e293b;
       border-color: #334155;
       color: white;
@@ -315,6 +368,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      flex-wrap: wrap;
       padding: 8px 24px;
       background: rgba(255, 255, 255, 0.55);
       backdrop-filter: blur(8px);
@@ -322,9 +376,10 @@
       border-bottom: 1px solid rgba(226, 232, 240, 0.6);
       font-size: 0.82rem;
       gap: 12px;
-      overflow-x: auto;
+      min-width: 0;
     }
-    body.theme-dark .filter-bar {
+    body.theme-dark .filter-bar,
+    body.theme-blueprint .filter-bar {
       background: rgba(15, 23, 42, 0.65);
       border-bottom-color: rgba(51, 65, 85, 0.6);
     }
@@ -332,7 +387,9 @@
     .filter-pills {
       display: flex;
       align-items: center;
+      flex-wrap: wrap;
       gap: 8px;
+      min-width: 0;
     }
 
     .filter-label {
@@ -365,6 +422,45 @@
       font-size: 0.8rem;
       font-weight: 600;
     }
+    .visibility-filter {
+      display: none;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    body.teacher-mode .visibility-filter {
+      display: inline-flex;
+    }
+    .visibility-filter-label {
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+    .visibility-filter-btn {
+      min-height: 30px;
+      padding: 4px 9px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-full);
+      background: var(--surface);
+      color: var(--text-main);
+      font: 600 0.75rem var(--font-family);
+      cursor: pointer;
+    }
+    .visibility-filter-btn.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #ffffff;
+    }
+    .hidden-post-label {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      border-radius: var(--radius-full);
+      background: #fef3c7;
+      color: #92400e;
+      font-size: 0.68rem;
+      font-weight: 800;
+    }
 
     /* ==========================================================================
        Board Views Container
@@ -395,6 +491,7 @@
       padding-bottom: 24px;
       align-items: flex-start;
       min-height: calc(100vh - 160px);
+      touch-action: pan-x pan-y;
     }
 
     .section-column {
@@ -407,11 +504,20 @@
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
       display: flex;
       flex-direction: column;
-      max-height: calc(100vh - 170px);
+      height: calc(100vh - var(--header-height) - 125px);
+      min-height: 280px;
+      max-height: calc(100vh - var(--header-height) - 125px);
+      overflow: hidden;
       transition: background 0.2s, box-shadow 0.2s;
     }
-    body.theme-dark .section-column {
+    body.theme-dark .section-column,
+    body.theme-blueprint .section-column {
       background: rgba(30, 41, 59, 0.8);
+    }
+    body.theme-blueprint .add-section-col {
+      background: rgba(30, 41, 59, 0.8);
+      border-color: rgba(226, 232, 240, 0.7);
+      color: #f8fafc;
     }
 
     .section-column.drag-over {
@@ -427,6 +533,7 @@
       justify-content: space-between;
       border-bottom: 1px solid var(--border-color);
       gap: 8px;
+      flex: 0 0 auto;
     }
 
     .section-title {
@@ -449,12 +556,22 @@
 
     .section-cards-list {
       padding: 12px;
-      overflow-y: auto;
       display: flex;
       flex-direction: column;
       gap: 12px;
       flex: 1;
-      min-height: 120px;
+      min-height: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      scrollbar-gutter: stable;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
+    }
+
+    .section-cards-list > .card {
+      flex: 0 0 auto;
+      width: 100%;
     }
 
     .section-add-card-btn {
@@ -471,6 +588,7 @@
       align-items: center;
       justify-content: center;
       gap: 6px;
+      flex: 0 0 auto;
       transition: all 0.2s;
       font-family: inherit;
     }
@@ -588,6 +706,13 @@
     .card-color-dark .card-actions-btn { color: #cbd5e1; }
     .card-color-dark .card-footer { border-top-color: #334155; }
     .card-color-dark .comment-box { background: rgba(15, 23, 42, 0.6); }
+    body.theme-blueprint .card:not(.card-color-dark) {
+      color: #1e293b;
+    }
+    body.theme-blueprint .card:not(.card-color-dark) .card-date,
+    body.theme-blueprint .card:not(.card-color-dark) .card-actions-btn {
+      color: #64748b;
+    }
 
     /* Card Pin Badge */
     .card-pinned-badge {
@@ -863,7 +988,8 @@
       color: #334155;
       word-break: break-word;
     }
-    body.theme-dark .comment-text {
+    body.theme-dark .comment-text,
+    body.theme-blueprint .comment-text {
       color: #cbd5e1;
     }
 
@@ -885,7 +1011,8 @@
       outline: none;
       border-color: var(--primary);
     }
-    body.theme-dark .comment-input {
+    body.theme-dark .comment-input,
+    body.theme-blueprint .comment-input {
       background: #1e293b;
       color: white;
       border-color: #334155;
@@ -980,7 +1107,8 @@
     .modal-overlay.active .modal-content {
       transform: scale(1) translateY(0);
     }
-    body.theme-dark .modal-content {
+    body.theme-dark .modal-content,
+    body.theme-blueprint .modal-content {
       background: #1e293b;
       color: white;
     }
@@ -1023,6 +1151,251 @@
       gap: 16px;
     }
 
+    .board-manager-modal-content {
+      max-width: 760px;
+      max-height: 88vh;
+    }
+    .board-manager-caption {
+      margin-top: 4px;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+    }
+    .board-manager-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .board-manager-toolbar .form-input {
+      flex: 1;
+      min-width: 0;
+    }
+    .board-manager-toolbar .btn-primary {
+      flex: 0 0 auto;
+      min-height: 42px;
+    }
+    .teacher-mode-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 32px;
+      flex: 0 0 auto;
+      padding: 5px 12px;
+      border: 1px solid #0ea5e9;
+      border-radius: var(--radius-full);
+      background: #f0f9ff;
+      color: #075985;
+      font-size: 0.78rem;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    body.teacher-mode .teacher-mode-badge {
+      border-color: #f59e0b;
+      background: #fffbeb;
+      color: #92400e;
+    }
+    .mode-switch-btn {
+      flex: 0 0 auto;
+      min-height: 32px;
+      padding: 5px 11px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-full);
+      background: var(--surface);
+      color: var(--text-muted);
+      cursor: pointer;
+      font: inherit;
+      font-size: 0.78rem;
+      font-weight: 800;
+      white-space: nowrap;
+      transition: background 0.15s, border-color 0.15s, transform 0.15s;
+    }
+    .mode-switch-btn:hover {
+      background: var(--surface-hover);
+      border-color: var(--primary);
+      color: var(--text-main);
+      transform: translateY(-1px);
+    }
+    body.teacher-mode .mode-switch-btn {
+      border-color: #f59e0b;
+      color: #92400e;
+      background: #fffbeb;
+    }
+    body.teacher-mode .mode-switch-btn:hover {
+      background: #fef3c7;
+      border-color: #d97706;
+      color: #78350f;
+    }
+    body.theme-dark .mode-switch-btn,
+    body.theme-blueprint .mode-switch-btn {
+      background: #1e293b;
+      border-color: #475569;
+      color: #cbd5e1;
+    }
+    body.theme-dark.teacher-mode .mode-switch-btn,
+    body.theme-blueprint.teacher-mode .mode-switch-btn {
+      background: #451a03;
+      border-color: #fbbf24;
+      color: #fef3c7;
+    }
+    body.theme-dark .teacher-mode-badge,
+    body.theme-blueprint .teacher-mode-badge {
+      background: #082f49;
+      color: #e0f2fe;
+      border-color: #38bdf8;
+    }
+    body.theme-dark.teacher-mode .teacher-mode-badge,
+    body.theme-blueprint.teacher-mode .teacher-mode-badge {
+      background: #451a03;
+      color: #fef3c7;
+      border-color: #fbbf24;
+    }
+    .teacher-mode-note {
+      padding: 10px 12px;
+      border: 1px solid #f59e0b;
+      border-radius: var(--radius-md);
+      background: #fffbeb;
+      color: #92400e;
+      font-size: 0.82rem;
+      line-height: 1.5;
+    }
+    body.theme-dark .teacher-mode-note,
+    body.theme-blueprint .teacher-mode-note {
+      background: #451a03;
+      color: #fef3c7;
+    }
+    .form-error {
+      min-height: 1.2em;
+      color: #dc2626;
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+    .board-manager-body {
+      padding: 18px 20px 22px;
+      overflow-y: auto;
+    }
+    .board-list-heading {
+      margin: 0 0 10px;
+      color: var(--text-main);
+      font-size: 0.85rem;
+    }
+    .board-list-heading:not(:first-child) {
+      margin-top: 22px;
+    }
+    .board-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 12px;
+    }
+    .board-item {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-width: 0;
+      padding: 14px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      color: var(--text-main);
+      text-align: left;
+      box-shadow: 0 3px 10px rgba(15, 23, 42, 0.08);
+    }
+    .board-item.current {
+      border: 2px solid var(--primary);
+      padding: 13px;
+      box-shadow: 0 0 0 3px rgba(255, 64, 129, 0.14);
+    }
+    .board-item-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .board-item-name {
+      font-size: 0.98rem;
+      font-weight: 800;
+      word-break: break-word;
+    }
+    .board-item-description {
+      min-height: 2.4em;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+    .board-item-meta {
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      line-height: 1.5;
+    }
+    .board-item-actions {
+      display: flex;
+      gap: 6px;
+      margin-top: auto;
+      padding-top: 4px;
+    }
+    .board-item-actions button {
+      min-height: 34px;
+      padding: 5px 9px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-color);
+      background: var(--surface-strong);
+      color: var(--text-main);
+      font: 600 0.75rem var(--font-family);
+      cursor: pointer;
+    }
+    .board-item-actions button:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    .board-item-actions .board-share-btn {
+      color: var(--primary);
+      border-color: rgba(255, 64, 129, 0.35);
+    }
+    .board-item-actions .board-delete-btn:hover {
+      border-color: #ef4444;
+      color: #ef4444;
+    }
+    .board-list-empty {
+      grid-column: 1 / -1;
+      padding: 18px;
+      border: 1px dashed var(--border-color);
+      border-radius: var(--radius-md);
+      color: var(--text-muted);
+      text-align: center;
+      font-size: 0.85rem;
+    }
+    .share-url-input {
+      min-height: 44px;
+      font-size: 0.82rem;
+    }
+    .qr-code-wrap {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      padding: 16px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      text-align: center;
+    }
+    .qr-code-wrap.visible {
+      display: flex;
+    }
+    .qr-code-image {
+      width: min(240px, 70vw);
+      height: auto;
+      aspect-ratio: 1;
+      background: #ffffff;
+      padding: 8px;
+      border-radius: var(--radius-sm);
+    }
+    .qr-code-caption {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+
     .form-group {
       display: flex;
       flex-direction: column;
@@ -1037,7 +1410,8 @@
       align-items: center;
       justify-content: space-between;
     }
-    body.theme-dark .form-label {
+    body.theme-dark .form-label,
+    body.theme-blueprint .form-label {
       color: #f8fafc;
     }
 
@@ -1054,7 +1428,10 @@
     }
     body.theme-dark .form-input,
     body.theme-dark .form-textarea,
-    body.theme-dark .form-select {
+    body.theme-dark .form-select,
+    body.theme-blueprint .form-input,
+    body.theme-blueprint .form-textarea,
+    body.theme-blueprint .form-select {
       background: #0f172a;
       border-color: #334155;
       color: white;
@@ -1065,9 +1442,16 @@
       box-shadow: 0 0 0 3px rgba(255, 64, 129, 0.15);
       background: white;
     }
+    .student-number-input {
+      min-height: 46px;
+      font-size: 1rem;
+    }
     body.theme-dark .form-input:focus, 
     body.theme-dark .form-textarea:focus, 
-    body.theme-dark .form-select:focus {
+    body.theme-dark .form-select:focus,
+    body.theme-blueprint .form-input:focus,
+    body.theme-blueprint .form-textarea:focus,
+    body.theme-blueprint .form-select:focus {
       background: #0f172a;
     }
 
@@ -1127,7 +1511,8 @@
     .btn-secondary:hover {
       background: #f1f5f9;
     }
-    body.theme-dark .btn-secondary {
+    body.theme-dark .btn-secondary,
+    body.theme-blueprint .btn-secondary {
       background: #1e293b;
       border-color: #334155;
       color: white;
@@ -1192,7 +1577,7 @@
       position: absolute;
       top: calc(100% + 8px);
       right: 0;
-      background: white;
+      background: var(--surface-strong);
       border-radius: var(--radius-md);
       border: 1px solid var(--border-color);
       box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
@@ -1202,7 +1587,8 @@
       display: none;
       flex-direction: column;
     }
-    body.theme-dark .dropdown-menu {
+    body.theme-dark .dropdown-menu,
+    body.theme-blueprint .dropdown-menu {
       background: #1e293b;
       border-color: #334155;
     }
@@ -1231,11 +1617,22 @@
       background: #f1f5f9;
       color: var(--primary);
     }
-    body.theme-dark .dropdown-item {
+    body.theme-dark .dropdown-item,
+    body.theme-blueprint .dropdown-item {
       color: #f8fafc;
     }
-    body.theme-dark .dropdown-item:hover {
+    body.theme-dark .dropdown-item:hover,
+    body.theme-blueprint .dropdown-item:hover {
       background: #334155;
+    }
+    .dropdown-item.active {
+      background: var(--primary);
+      color: #ffffff;
+      font-weight: 700;
+    }
+    .dropdown-item.active:hover {
+      background: var(--primary-hover);
+      color: #ffffff;
     }
     .dropdown-divider {
       height: 1px;
@@ -1326,8 +1723,17 @@
     @media (max-width: 860px) {
       .header {
         padding: 0 12px;
+        padding-top: 8px;
+        padding-bottom: 8px;
+      }
+      .header-left {
+        gap: 8px;
+        flex-basis: 360px;
       }
       .board-subtitle {
+        display: none;
+      }
+      .board-manager-btn span {
         display: none;
       }
       .search-input {
@@ -1342,6 +1748,10 @@
       .view-tab {
         padding: 6px 10px;
       }
+      .teacher-mode-badge,
+      .mode-switch-btn {
+        font-size: 0.72rem;
+      }
       .btn-primary span {
         display: none;
       }
@@ -1351,8 +1761,36 @@
     }
 
     @media (max-width: 580px) {
+      .header {
+        align-items: flex-start;
+        flex-wrap: wrap;
+      }
+      .header-left {
+        flex: 1 1 100%;
+      }
+      .view-switcher {
+        margin-left: auto;
+      }
+      .header-right {
+        flex: 1 1 100%;
+        justify-content: flex-start;
+      }
+      .header-mode-controls {
+        flex: 1 1 100%;
+        align-items: flex-start;
+        padding-top: 2px;
+      }
+      .mode-switch-btn {
+        max-width: 100%;
+      }
       .filter-bar {
         padding: 6px 12px;
+        align-items: flex-start;
+      }
+      .filter-pills,
+      .visibility-filter,
+      .stat-badge {
+        width: 100%;
       }
       .board-viewport {
         padding: 16px 12px;
@@ -1390,6 +1828,15 @@
         </div>
         <span class="board-subtitle" id="boardDescDisplay">アイデアや画像を自由に投稿してリアルタイムに整理しましょう</span>
       </div>
+      <button class="board-manager-btn" id="boardManagerBtn" title="ボード一覧を開く">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="7" height="7" rx="1"></rect>
+          <rect x="14" y="3" width="7" height="7" rx="1"></rect>
+          <rect x="3" y="14" width="7" height="7" rx="1"></rect>
+          <rect x="14" y="14" width="7" height="7" rx="1"></rect>
+        </svg>
+        <span>ボード一覧</span>
+      </button>
     </div>
 
     <!-- Center Layout Tabs -->
@@ -1500,14 +1947,10 @@
         </div>
       </div>
 
-      <!-- Add Post Button -->
-      <button class="btn-primary" id="headerAddBtn">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <line x1="12" y1="5" x2="12" y2="19"></line>
-          <line x1="5" y1="12" x2="19" y2="12"></line>
-        </svg>
-        <span>投稿する</span>
-      </button>
+      <div class="header-mode-controls">
+        <span class="teacher-mode-badge" id="teacherModeBadge">👤 児童モード</span>
+        <button class="mode-switch-btn" id="modeSwitchBtn" type="button">先生モードへ</button>
+      </div>
     </div>
   </header>
 
@@ -1528,6 +1971,12 @@
     </div>
     <div class="stat-badge">
       <span id="cardCountDisplay">0 件のカード</span>
+    </div>
+    <div class="visibility-filter" id="visibilityFilter" aria-label="投稿の表示状態">
+      <span class="visibility-filter-label">投稿：</span>
+      <button type="button" class="visibility-filter-btn" data-visibility-filter="all">すべて</button>
+      <button type="button" class="visibility-filter-btn active" data-visibility-filter="visible">表示中</button>
+      <button type="button" class="visibility-filter-btn" data-visibility-filter="hidden">非表示</button>
     </div>
   </div>
 
@@ -1576,6 +2025,12 @@
 
       <form id="postForm" class="modal-body">
         <input type="hidden" id="cardIdInput">
+
+        <!-- Student number -->
+        <div class="form-group">
+          <label class="form-label" for="studentNumberInput">出席番号</label>
+          <input type="text" id="studentNumberInput" class="form-input student-number-input" placeholder="例：12" inputmode="numeric" autocomplete="off" enterkeyhint="done" required>
+        </div>
 
         <!-- Title -->
         <div class="form-group">
@@ -1692,6 +2147,114 @@
     </div>
   </div>
 
+  <!-- Board Manager -->
+  <div class="modal-overlay" id="boardManagerModal">
+    <div class="modal-content board-manager-modal-content">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title">ボード一覧</h3>
+          <p class="board-manager-caption">授業や学級ごとのボードを切り替えられます</p>
+        </div>
+        <button class="modal-close-btn" id="closeBoardManagerBtn" title="閉じる">✕</button>
+      </div>
+      <div class="board-manager-toolbar">
+        <input type="search" id="boardSearchInput" class="form-input" placeholder="ボード名を検索..." autocomplete="off">
+        <button type="button" class="btn-primary" id="newBoardBtn">
+          <span>＋ 新しいボード</span>
+        </button>
+        <button type="button" class="btn-secondary" id="teacherModeBtn">先生モード</button>
+      </div>
+      <div class="board-manager-body">
+        <h4 class="board-list-heading">最近使ったボード</h4>
+        <div class="board-list" id="recentBoardList"></div>
+        <h4 class="board-list-heading">すべてのボード</h4>
+        <div class="board-list" id="allBoardList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Teacher Authentication -->
+  <div class="modal-overlay" id="teacherAuthModal">
+    <div class="modal-content" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="teacherAuthTitle">先生モード</h3>
+        <button class="modal-close-btn" id="closeTeacherAuthBtn" title="閉じる">✕</button>
+      </div>
+      <form id="teacherAuthForm" class="modal-body">
+        <div class="teacher-mode-note" id="teacherAuthNote"></div>
+        <div class="form-group">
+          <label class="form-label" for="teacherPasswordInput">パスワード</label>
+          <input type="password" id="teacherPasswordInput" class="form-input" autocomplete="new-password" required>
+        </div>
+        <div class="form-group" id="teacherPasswordConfirmGroup">
+          <label class="form-label" for="teacherPasswordConfirmInput">パスワード（確認）</label>
+          <input type="password" id="teacherPasswordConfirmInput" class="form-input" autocomplete="new-password">
+        </div>
+        <p class="form-error" id="teacherAuthError" role="alert"></p>
+      </form>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" id="cancelTeacherAuthBtn">キャンセル</button>
+        <button type="submit" form="teacherAuthForm" class="btn-primary" id="teacherAuthSubmitBtn">先生モードへ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- New Board -->
+  <div class="modal-overlay" id="newBoardModal">
+    <div class="modal-content" style="max-width: 480px;">
+      <div class="modal-header">
+        <h3 class="modal-title">新しいボードを作成</h3>
+        <button class="modal-close-btn" id="closeNewBoardBtn" title="閉じる">✕</button>
+      </div>
+      <form id="newBoardForm" class="modal-body">
+        <div class="form-group">
+          <label class="form-label" for="newBoardNameInput">ボード名</label>
+          <input type="text" id="newBoardNameInput" class="form-input" placeholder="例：6年1組 社会" required autofocus>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="newBoardDescriptionInput">説明（任意）</label>
+          <input type="text" id="newBoardDescriptionInput" class="form-input" placeholder="例：平安時代の問い集め">
+        </div>
+      </form>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" id="cancelNewBoardBtn">キャンセル</button>
+        <button type="submit" form="newBoardForm" class="btn-primary">作成する</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Board Share -->
+  <div class="modal-overlay" id="shareBoardModal">
+    <div class="modal-content" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3 class="modal-title">ボードを共有</h3>
+        <button class="modal-close-btn" id="closeShareBoardBtn" title="閉じる">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label" for="shareBoardName">ボード名</label>
+          <div id="shareBoardName" class="board-item-name"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="shareBoardUrlInput">共有URL</label>
+          <input type="url" id="shareBoardUrlInput" class="form-input share-url-input" readonly>
+        </div>
+        <div class="board-item-actions">
+          <button type="button" class="btn-primary" id="copyShareUrlBtn">URLをコピー</button>
+          <button type="button" class="btn-secondary" id="showQrCodeBtn">QRコードを表示</button>
+          <button type="button" class="btn-secondary" id="printQrCodeBtn">印刷</button>
+        </div>
+        <div class="qr-code-wrap" id="qrCodeWrap">
+          <img class="qr-code-image" id="qrCodeImage" alt="ボード共有URLのQRコード">
+          <p class="qr-code-caption">このQRコードを読み取ると、このボードを開けます</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" id="cancelShareBoardBtn">閉じる</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Hidden File Input for JSON Import -->
   <input type="file" id="importFileInput" accept=".json" style="display: none;">
 
@@ -1706,6 +2269,9 @@
   <!-- ========================================================================
        Application JavaScript
        ======================================================================== -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="supabase-client.js"></script>
   <script>
     (function () {
       'use strict';
@@ -1835,8 +2401,13 @@
       // App State
       // ======================================================================
       const STORAGE_KEY = "padlet_mvp_store_v1";
+      const CURRENT_STUDENT_NUMBER_KEY = "padlet_current_student_number_v1";
+      const TEACHER_AUTH_STORAGE_KEY = "padlet_teacher_auth_v1";
+      const BOARDS_STORAGE_VERSION = 2;
 
       let state = {
+        boards: [],
+        activeBoardId: "",
         title: DEMO_DATA.title,
         description: DEMO_DATA.description,
         theme: DEMO_DATA.theme,
@@ -1848,6 +2419,56 @@
         editingCardId: null,
         activeImageBase64: ""
       };
+      let currentStudentNumber = null;
+      let teacherMode = false;
+      let visibilityFilter = "visible";
+      let onlineUserId = null;
+      let onlineBoardRole = null;
+      let postsRealtimeSubscription = null;
+
+      function isSupabaseBoardId(boardId = state.activeBoardId) {
+        return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(boardId || "");
+      }
+
+      function isOnlineBoard() {
+        return Boolean(window.PadletSupabase?.isConfigured() && isSupabaseBoardId());
+      }
+
+      function cloneData(value) {
+        return JSON.parse(JSON.stringify(value));
+      }
+
+      function normalizeBoard(rawBoard = {}) {
+        const now = new Date().toISOString();
+        return {
+          id: rawBoard.id || generateId("board"),
+          name: rawBoard.name || rawBoard.title || "新しいボード",
+          description: rawBoard.description || "",
+          createdAt: rawBoard.createdAt || now,
+          updatedAt: rawBoard.updatedAt || rawBoard.createdAt || now,
+          theme: rawBoard.theme || "theme-pastel",
+          currentView: rawBoard.currentView || "wall",
+          sections: cloneData(rawBoard.sections || DEMO_DATA.sections),
+          posts: cloneData(rawBoard.posts || rawBoard.cards || [])
+        };
+      }
+
+      function getActiveBoard() {
+        return state.boards.find(board => board.id === state.activeBoardId) || state.boards[0];
+      }
+
+      function syncActiveBoard() {
+        const board = getActiveBoard();
+        if (!board) return;
+        board.name = state.title;
+        board.description = state.description;
+        board.theme = state.theme;
+        board.currentView = state.currentView;
+        board.sections = state.sections;
+        board.posts = state.cards;
+        board.updatedAt = new Date().toISOString();
+        state.activeBoardId = board.id;
+      }
 
       // Load from LocalStorage
       function loadFromStorage() {
@@ -1855,7 +2476,53 @@
           const saved = localStorage.getItem(STORAGE_KEY);
           if (saved) {
             const parsed = JSON.parse(saved);
-            state = { ...state, ...parsed };
+            if (Array.isArray(parsed.boards) && parsed.boards.length > 0) {
+              state.boards = parsed.boards.map(normalizeBoard);
+              state.activeBoardId = parsed.activeBoardId || state.boards[0].id;
+              const activeBoard = getActiveBoard();
+              state = {
+                ...state,
+                title: activeBoard.name,
+                description: activeBoard.description,
+                theme: activeBoard.theme,
+                currentView: activeBoard.currentView,
+                sections: activeBoard.sections,
+                cards: activeBoard.posts
+              };
+            } else {
+              const migratedBoard = normalizeBoard({
+                ...parsed,
+                name: parsed.title,
+                posts: parsed.cards
+              });
+              state.boards = [migratedBoard];
+              state.activeBoardId = migratedBoard.id;
+              state = {
+                ...state,
+                title: migratedBoard.name,
+                description: migratedBoard.description,
+                theme: migratedBoard.theme,
+                currentView: migratedBoard.currentView,
+                sections: migratedBoard.sections,
+                cards: migratedBoard.posts
+              };
+            }
+          }
+          if (state.boards.length === 0) {
+            const defaultBoard = normalizeBoard({
+              name: DEMO_DATA.title,
+              description: DEMO_DATA.description,
+              theme: DEMO_DATA.theme,
+              sections: DEMO_DATA.sections,
+              posts: DEMO_DATA.cards
+            });
+            state.boards = [defaultBoard];
+            state.activeBoardId = defaultBoard.id;
+            state.title = defaultBoard.name;
+            state.description = defaultBoard.description;
+            state.theme = defaultBoard.theme;
+            state.sections = defaultBoard.sections;
+            state.cards = defaultBoard.posts;
           }
         } catch (e) {
           console.error("Failed to load local storage:", e);
@@ -1865,13 +2532,11 @@
       // Save to LocalStorage
       function saveToStorage() {
         try {
+          syncActiveBoard();
           const dataToSave = {
-            title: state.title,
-            description: state.description,
-            theme: state.theme,
-            currentView: state.currentView,
-            sections: state.sections,
-            cards: state.cards
+            version: BOARDS_STORAGE_VERSION,
+            activeBoardId: state.activeBoardId,
+            boards: state.boards
           };
           localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
         } catch (e) {
@@ -1892,12 +2557,16 @@
       const colorPills = document.querySelectorAll(".color-pill");
       const cardCountDisplay = document.getElementById("cardCountDisplay");
       const canvasHint = document.getElementById("canvasHint");
+      const boardManagerBtn = document.getElementById("boardManagerBtn");
+      const teacherModeBadge = document.getElementById("teacherModeBadge");
+      const modeSwitchBtn = document.getElementById("modeSwitchBtn");
 
       // Modals
       const postModal = document.getElementById("postModal");
       const postForm = document.getElementById("postForm");
       const postModalTitle = document.getElementById("postModalTitle");
       const cardIdInput = document.getElementById("cardIdInput");
+      const studentNumberInput = document.getElementById("studentNumberInput");
       const cardTitleInput = document.getElementById("cardTitleInput");
       const cardSectionSelect = document.getElementById("cardSectionSelect");
       const cardContentInput = document.getElementById("cardContentInput");
@@ -1913,18 +2582,260 @@
       const checklistBuilder = document.getElementById("checklistBuilder");
       const addChecklistItemBtn = document.getElementById("addChecklistItemBtn");
 
+      function normalizeStudentNumberInput(value) {
+        return value.replace(/[０-９]/g, digit => String.fromCharCode(digit.charCodeAt(0) - 0xfee0));
+      }
+
+      function getValidStudentNumber(value) {
+        const normalizedValue = normalizeStudentNumberInput(String(value ?? "").trim());
+        const number = Number(normalizedValue);
+        return normalizedValue && /^\d+$/.test(normalizedValue) && Number.isSafeInteger(number) && number > 0
+          ? number
+          : null;
+      }
+
+      function loadCurrentStudentNumber() {
+        try {
+          currentStudentNumber = getValidStudentNumber(localStorage.getItem(CURRENT_STUDENT_NUMBER_KEY));
+        } catch (error) {
+          currentStudentNumber = null;
+        }
+      }
+
+      function setCurrentStudentNumber(value) {
+        const number = getValidStudentNumber(value);
+        if (!number) return;
+        currentStudentNumber = number;
+        try {
+          localStorage.setItem(CURRENT_STUDENT_NUMBER_KEY, String(number));
+        } catch (error) {
+          // Continue without persistence if storage is unavailable.
+        }
+      }
+
+      function isTeacherMode() {
+        return teacherMode === true;
+      }
+
+      function canEditPost(card) {
+        if (isOnlineBoard() && card && card.authorUserId) {
+          return card.authorUserId === onlineUserId || onlineBoardRole === "teacher";
+        }
+        const cardStudentNumber = getValidStudentNumber(card && card.studentNumber);
+        return isTeacherMode() || (currentStudentNumber !== null && cardStudentNumber !== null && currentStudentNumber === cardStudentNumber);
+      }
+
+      function canEditCard(card) {
+        return canEditPost(card);
+      }
+
+      function canDeletePost(card) {
+        if (isOnlineBoard() && card && card.authorUserId) {
+          return card.authorUserId === onlineUserId || onlineBoardRole === "teacher";
+        }
+        return isTeacherMode() || canEditCard(card);
+      }
+
+      function canManageVisibility() {
+        return isTeacherMode();
+      }
+
+      function mapRemotePost(remotePost) {
+        return {
+          id: remotePost.id,
+          boardId: remotePost.board_id,
+          authorUserId: remotePost.author_user_id,
+          studentNumber: remotePost.student_number,
+          isHidden: false,
+          sectionId: remotePost.section_id || (state.sections[0] ? state.sections[0].id : ""),
+          title: remotePost.title || "",
+          content: remotePost.content || "",
+          color: remotePost.color || "yellow",
+          imageUrl: remotePost.image_url || "",
+          linkUrl: remotePost.link_url || "",
+          tags: [],
+          pinned: Boolean(remotePost.pinned),
+          likes: 0,
+          isLiked: false,
+          createdAt: remotePost.created_at,
+          canvasX: Number(remotePost.canvas_x ?? 100),
+          canvasY: Number(remotePost.canvas_y ?? 100),
+          checklist: [],
+          comments: [],
+          lastEditedBy: remotePost.last_edited_by,
+          lastEditedAt: remotePost.updated_at
+        };
+      }
+
+      function handleRemotePostChange(payload) {
+        if (!isOnlineBoard()) return;
+        const eventType = payload.eventType;
+        const remotePost = eventType === "DELETE" ? payload.old : payload.new;
+        if (!remotePost) return;
+        if (eventType !== "DELETE" && remotePost.board_id !== state.activeBoardId) return;
+
+        if (eventType === "DELETE") {
+          state.cards = state.cards.filter(card => card.id !== remotePost.id);
+        } else {
+          const nextCard = mapRemotePost(remotePost);
+          const existingIndex = state.cards.findIndex(card => card.id === nextCard.id);
+          if (existingIndex === -1) {
+            state.cards.unshift(nextCard);
+          } else {
+            state.cards[existingIndex] = nextCard;
+          }
+        }
+        saveToStorage();
+        renderApp();
+      }
+
+      function stopPostsRealtime() {
+        if (postsRealtimeSubscription) {
+          postsRealtimeSubscription.unsubscribe();
+          postsRealtimeSubscription = null;
+        }
+      }
+
+      function startPostsRealtime(boardId = state.activeBoardId) {
+        stopPostsRealtime();
+        if (!window.PadletSupabase?.isConfigured() || !isSupabaseBoardId(boardId)) return;
+        postsRealtimeSubscription = window.PadletSupabase.subscribeToPosts(boardId, {
+          posts: handleRemotePostChange
+        });
+      }
+
+      async function loadOnlinePosts(boardId = state.activeBoardId) {
+        if (!window.PadletSupabase?.isConfigured() || !isSupabaseBoardId(boardId)) return;
+        const remotePosts = await window.PadletSupabase.fetchPosts(boardId);
+        if (state.activeBoardId !== boardId) return;
+        state.cards = remotePosts.map(mapRemotePost);
+        const activeBoard = getActiveBoard();
+        if (activeBoard) activeBoard.posts = state.cards;
+        saveToStorage();
+        renderApp();
+      }
+
+      function getOnlinePostPayload(card, studentNumber, fields = {}) {
+        return {
+          boardId: state.activeBoardId,
+          sectionId: null,
+          studentNumber,
+          title: fields.title ?? card.title,
+          content: fields.content ?? card.content,
+          color: fields.color ?? card.color,
+          imageUrl: fields.imageUrl ?? card.imageUrl,
+          linkUrl: fields.linkUrl ?? card.linkUrl,
+          pinned: fields.pinned ?? card.pinned,
+          canvasX: fields.canvasX ?? card.canvasX,
+          canvasY: fields.canvasY ?? card.canvasY
+        };
+      }
+
+      async function hashTeacherPassword(password) {
+        if (!window.crypto || !window.crypto.subtle || !window.TextEncoder) {
+          throw new Error("この環境では先生認証を利用できません。");
+        }
+        const data = new TextEncoder().encode(password);
+        const digest = await window.crypto.subtle.digest("SHA-256", data);
+        return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, "0")).join("");
+      }
+
+      function getTeacherPasswordHash() {
+        try {
+          return JSON.parse(localStorage.getItem(TEACHER_AUTH_STORAGE_KEY) || "null")?.passwordHash || "";
+        } catch (error) {
+          return "";
+        }
+      }
+
+      function setTeacherMode(enabled) {
+        teacherMode = enabled === true;
+        if (!teacherMode) visibilityFilter = "visible";
+        body.classList.toggle("teacher-mode", teacherMode);
+        teacherModeBadge.textContent = teacherMode ? "🛡️ 先生モード" : "👤 児童モード";
+        modeSwitchBtn.textContent = teacherMode ? "児童モードへ戻る" : "先生モードへ";
+        modeSwitchBtn.setAttribute("aria-label", teacherMode ? "児童モードへ戻る" : "先生モードへ");
+        if (boardManagerModal && boardManagerModal.classList.contains("active")) {
+          renderBoardManager();
+        }
+        renderApp();
+      }
+
+      function openTeacherAuthModal() {
+        const hasPassword = !!getTeacherPasswordHash();
+        teacherAuthForm.reset();
+        teacherAuthError.textContent = "";
+        teacherAuthTitle.textContent = hasPassword ? "先生モードに入る" : "先生モードを設定";
+        teacherAuthNote.textContent = hasPassword
+          ? "先生用パスワードを入力してください。"
+          : "初回のみ先生用パスワードを設定します。パスワードはこの端末にハッシュ化して保存されます。";
+        teacherPasswordConfirmGroup.hidden = hasPassword;
+        teacherPasswordConfirmInput.required = !hasPassword;
+        teacherAuthSubmitBtn.textContent = hasPassword ? "先生モードへ" : "設定して開始";
+        teacherAuthModal.classList.add("active");
+        setTimeout(() => teacherPasswordInput.focus(), 120);
+      }
+
+      function closeTeacherAuthModal() {
+        teacherAuthModal.classList.remove("active");
+      }
+
+      studentNumberInput.addEventListener("invalid", () => {
+        studentNumberInput.setCustomValidity("出席番号は1以上の整数で入力してください。");
+      });
+      studentNumberInput.addEventListener("input", () => {
+        const normalizedValue = normalizeStudentNumberInput(studentNumberInput.value);
+        if (studentNumberInput.value !== normalizedValue) {
+          studentNumberInput.value = normalizedValue;
+        }
+        studentNumberInput.setCustomValidity("");
+      });
+
       // Title Edit Modal
       const titleModal = document.getElementById("titleModal");
       const titleForm = document.getElementById("titleForm");
       const boardTitleInput = document.getElementById("boardTitleInput");
       const boardDescInput = document.getElementById("boardDescInput");
+      const boardManagerModal = document.getElementById("boardManagerModal");
+      const closeBoardManagerBtn = document.getElementById("closeBoardManagerBtn");
+      const boardSearchInput = document.getElementById("boardSearchInput");
+      const recentBoardList = document.getElementById("recentBoardList");
+      const allBoardList = document.getElementById("allBoardList");
+      const newBoardBtn = document.getElementById("newBoardBtn");
+      const newBoardModal = document.getElementById("newBoardModal");
+      const closeNewBoardBtn = document.getElementById("closeNewBoardBtn");
+      const cancelNewBoardBtn = document.getElementById("cancelNewBoardBtn");
+      const newBoardForm = document.getElementById("newBoardForm");
+      const newBoardNameInput = document.getElementById("newBoardNameInput");
+      const newBoardDescriptionInput = document.getElementById("newBoardDescriptionInput");
+      const teacherModeBtn = document.getElementById("teacherModeBtn");
+      const teacherAuthModal = document.getElementById("teacherAuthModal");
+      const closeTeacherAuthBtn = document.getElementById("closeTeacherAuthBtn");
+      const cancelTeacherAuthBtn = document.getElementById("cancelTeacherAuthBtn");
+      const teacherAuthForm = document.getElementById("teacherAuthForm");
+      const teacherAuthTitle = document.getElementById("teacherAuthTitle");
+      const teacherAuthNote = document.getElementById("teacherAuthNote");
+      const teacherPasswordInput = document.getElementById("teacherPasswordInput");
+      const teacherPasswordConfirmGroup = document.getElementById("teacherPasswordConfirmGroup");
+      const teacherPasswordConfirmInput = document.getElementById("teacherPasswordConfirmInput");
+      const teacherAuthError = document.getElementById("teacherAuthError");
+      const teacherAuthSubmitBtn = document.getElementById("teacherAuthSubmitBtn");
+      const shareBoardModal = document.getElementById("shareBoardModal");
+      const closeShareBoardBtn = document.getElementById("closeShareBoardBtn");
+      const cancelShareBoardBtn = document.getElementById("cancelShareBoardBtn");
+      const shareBoardName = document.getElementById("shareBoardName");
+      const shareBoardUrlInput = document.getElementById("shareBoardUrlInput");
+      const copyShareUrlBtn = document.getElementById("copyShareUrlBtn");
+      const showQrCodeBtn = document.getElementById("showQrCodeBtn");
+      const printQrCodeBtn = document.getElementById("printQrCodeBtn");
+      const qrCodeWrap = document.getElementById("qrCodeWrap");
+      const qrCodeImage = document.getElementById("qrCodeImage");
 
       // Menus
       const themeBtn = document.getElementById("themeBtn");
       const themeMenu = document.getElementById("themeMenu");
       const moreBtn = document.getElementById("moreBtn");
       const moreMenu = document.getElementById("moreMenu");
-      const headerAddBtn = document.getElementById("headerAddBtn");
       const fabBtn = document.getElementById("fabBtn");
       const shareBtn = document.getElementById("shareBtn");
       const exportBtn = document.getElementById("exportBtn");
@@ -1993,12 +2904,316 @@
         const themes = ["theme-pastel", "theme-corkboard", "theme-blueprint", "theme-sunset", "theme-mint", "theme-dark", "theme-minimal"];
         themes.forEach(t => body.classList.remove(t));
         body.classList.add(themeName);
+        document.querySelectorAll(".dropdown-item[data-theme]").forEach(item => {
+          item.classList.toggle("active", item.dataset.theme === themeName);
+        });
         state.theme = themeName;
         saveToStorage();
       }
 
+      function formatBoardDate(dateValue) {
+        if (!dateValue) return "未記録";
+        return formatRelativeTime(dateValue);
+      }
+
+      function normalizeSearchText(text) {
+        return String(text ?? "")
+          .normalize("NFKC")
+          .toLowerCase()
+          .trim();
+      }
+
+      function renderBoardItem(board) {
+        const currentClass = board.id === state.activeBoardId ? " current" : "";
+        const currentLabel = board.id === state.activeBoardId ? "使用中" : "";
+        return `
+          <article class="board-item${currentClass}" data-board-id="${escapeHtml(board.id)}">
+            <div class="board-item-head">
+              <div class="board-item-name">${escapeHtml(board.name)}</div>
+              ${currentLabel ? `<span class="section-count">${currentLabel}</span>` : ""}
+            </div>
+            <div class="board-item-description">${escapeHtml(board.description || "説明なし")}</div>
+            <div class="board-item-meta">
+              作成日：${escapeHtml(formatBoardDate(board.createdAt))}<br>
+              最終使用：${escapeHtml(formatBoardDate(board.updatedAt))}
+            </div>
+            <div class="board-item-actions">
+              <button type="button" class="board-open-btn" data-board-id="${escapeHtml(board.id)}">開く</button>
+              <button type="button" class="board-share-btn" data-board-id="${escapeHtml(board.id)}">共有</button>
+              <button type="button" class="board-rename-btn" data-board-id="${escapeHtml(board.id)}">名前を変更</button>
+              <button type="button" class="board-delete-btn" data-board-id="${escapeHtml(board.id)}">削除</button>
+            </div>
+          </article>
+        `;
+      }
+
+      function renderBoardManager() {
+        teacherModeBtn.textContent = isTeacherMode() ? "児童モードに戻る" : "先生モード";
+        const query = normalizeSearchText(boardSearchInput.value);
+        const matchingBoards = state.boards.filter(board => {
+          const searchableText = normalizeSearchText(`${board.name} ${board.description}`);
+          return !query || searchableText.includes(query);
+        });
+        const recentBoards = [...matchingBoards]
+          .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+          .slice(0, 3);
+        const allBoards = [...matchingBoards].sort((a, b) => a.name.localeCompare(b.name, "ja"));
+        recentBoardList.innerHTML = recentBoards.length
+          ? recentBoards.map(renderBoardItem).join("")
+          : `<div class="board-list-empty">最近使ったボードはありません</div>`;
+        allBoardList.innerHTML = allBoards.length
+          ? allBoards.map(renderBoardItem).join("")
+          : `<div class="board-list-empty">条件に一致するボードがありません</div>`;
+      }
+
+      function openBoardManager() {
+        boardSearchInput.value = "";
+        renderBoardManager();
+        boardManagerModal.classList.add("active");
+      }
+
+      function closeBoardManager() {
+        boardManagerModal.classList.remove("active");
+      }
+
+      function openNewBoardModal() {
+        newBoardForm.reset();
+        newBoardModal.classList.add("active");
+        setTimeout(() => newBoardNameInput.focus(), 120);
+      }
+
+      function closeNewBoardModal() {
+        newBoardModal.classList.remove("active");
+      }
+
+      function getBoardShareUrl(boardId) {
+        const shareUrl = new URL(window.location.href);
+        shareUrl.search = "";
+        shareUrl.searchParams.set("board", boardId);
+        shareUrl.hash = "";
+        return shareUrl.toString();
+      }
+
+      function updateBoardUrl(boardId, replace = false) {
+        const url = getBoardShareUrl(boardId);
+        if (replace) {
+          window.history.replaceState({ boardId }, "", url);
+        } else {
+          window.history.pushState({ boardId }, "", url);
+        }
+      }
+
+      function activateBoard(board) {
+        state.activeBoardId = board.id;
+        state.title = board.name;
+        state.description = board.description;
+        state.theme = board.theme;
+        state.currentView = board.currentView;
+        state.sections = board.sections;
+        state.cards = board.posts;
+        board.updatedAt = new Date().toISOString();
+      }
+
+      function switchBoard(boardId, updateUrl = true) {
+        const board = state.boards.find(item => item.id === boardId);
+        if (!board || board.id === state.activeBoardId) {
+          closeBoardManager();
+          return;
+        }
+        stopPostsRealtime();
+        onlineBoardRole = null;
+        saveToStorage();
+        activateBoard(board);
+        if (updateUrl) updateBoardUrl(board.id);
+        saveToStorage();
+        closeBoardManager();
+        renderApp();
+        startPostsRealtime(board.id);
+        loadOnlinePosts(board.id).catch(error => {
+          console.warn("Supabase posts loading was skipped:", error.message);
+        });
+        showToast(`「${board.name}」に切り替えました`, "📋");
+      }
+
+      function openShareBoardModal(boardId) {
+        const board = state.boards.find(item => item.id === boardId);
+        if (!board) return;
+        const shareUrl = getBoardShareUrl(board.id);
+        shareBoardName.textContent = board.name;
+        shareBoardUrlInput.value = shareUrl;
+        qrCodeImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(shareUrl)}`;
+        qrCodeWrap.classList.remove("visible");
+        shareBoardModal.classList.add("active");
+      }
+
+      function closeShareBoardModal() {
+        shareBoardModal.classList.remove("active");
+        qrCodeImage.removeAttribute("src");
+      }
+
+      function copyShareUrl() {
+        const value = shareBoardUrlInput.value;
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard.writeText(value).then(() => {
+            showToast("共有URLをコピーしました", "🔗");
+          }).catch(() => showToast("URLを選択してコピーしてください", "⚠️"));
+          return;
+        }
+        shareBoardUrlInput.focus();
+        shareBoardUrlInput.select();
+        try {
+          document.execCommand("copy");
+          showToast("共有URLをコピーしました", "🔗");
+        } catch (error) {
+          showToast("URLを選択してコピーしてください", "⚠️");
+        }
+      }
+
+      function applyBoardFromUrl(showError = true) {
+        const requestedBoardId = new URLSearchParams(window.location.search).get("board");
+        if (!requestedBoardId) return true;
+        const board = state.boards.find(item => item.id === requestedBoardId);
+        if (!board) {
+          if (showError) showToast("指定されたボードが見つかりません", "⚠️");
+          return false;
+        }
+        activateBoard(board);
+        saveToStorage();
+        return true;
+      }
+
+      function normalizeRemoteBoard(remoteBoard) {
+        return normalizeBoard({
+          id: remoteBoard.id,
+          name: remoteBoard.name,
+          description: remoteBoard.description,
+          createdAt: remoteBoard.created_at,
+          updatedAt: remoteBoard.updated_at,
+          theme: remoteBoard.theme,
+          currentView: remoteBoard.current_view,
+          sections: DEMO_DATA.sections,
+          posts: []
+        });
+      }
+
+      function mergeRemoteBoard(remoteBoard) {
+        let localBoard = state.boards.find(board => board.id === remoteBoard.id);
+        if (!localBoard) {
+          localBoard = normalizeRemoteBoard(remoteBoard);
+          state.boards.push(localBoard);
+        } else {
+          localBoard.name = remoteBoard.name;
+          localBoard.description = remoteBoard.description || "";
+          localBoard.theme = remoteBoard.theme || localBoard.theme;
+          localBoard.currentView = remoteBoard.current_view || localBoard.currentView;
+          localBoard.updatedAt = remoteBoard.updated_at || localBoard.updatedAt;
+        }
+        return localBoard;
+      }
+
+      async function joinRemoteBoardFromUrl(boardParameter) {
+        const api = window.PadletSupabase;
+        if (!api || !api.isConfigured() || !boardParameter) return null;
+
+        let membership;
+        if (isSupabaseBoardId(boardParameter)) {
+          membership = await api.joinBoard(boardParameter);
+        } else if (boardParameter.startsWith("board-")) {
+          membership = await api.joinBoardByLegacyId(boardParameter);
+        } else {
+          return null;
+        }
+
+        const client = api.getClient();
+        const lookup = boardParameter.startsWith("board-")
+          ? client.from(api.TABLES.boards).select("*").eq("legacy_id", boardParameter).maybeSingle()
+          : client.from(api.TABLES.boards).select("*").eq("id", boardParameter).maybeSingle();
+        const { data, error } = await lookup;
+        if (error) throw error;
+        return { board: data, membership };
+      }
+
+      async function initializeOnlineBoardContext() {
+        const api = window.PadletSupabase;
+        if (!api || !api.isConfigured()) return;
+        const session = await api.initialize();
+        if (!session.enabled) return;
+        onlineUserId = session.user?.id || null;
+
+        const joinedBoards = await api.listJoinedBoards();
+        joinedBoards.filter(Boolean).forEach(remoteBoard => {
+          const localBoard = mergeRemoteBoard(remoteBoard);
+          if (localBoard.id === state.activeBoardId) {
+            onlineBoardRole = remoteBoard.membershipRole || null;
+          }
+        });
+
+        const boardParameter = new URLSearchParams(window.location.search).get("board");
+        if (!boardParameter) {
+          renderBoardManager();
+          return;
+        }
+
+        const remoteResult = await joinRemoteBoardFromUrl(boardParameter);
+        if (!remoteResult?.board) return;
+        onlineBoardRole = remoteResult.membership?.role || "student";
+        const localBoard = mergeRemoteBoard(remoteResult.board);
+        activateBoard(localBoard);
+        updateBoardUrl(localBoard.id, true);
+        const remotePosts = await api.fetchPosts(localBoard.id);
+        state.cards = remotePosts.map(mapRemotePost);
+        localBoard.posts = state.cards;
+        saveToStorage();
+        closeBoardManager();
+        renderApp();
+        startPostsRealtime(localBoard.id);
+      }
+
+      function renameBoard(boardId) {
+        const board = state.boards.find(item => item.id === boardId);
+        if (!board) return;
+        const nextName = prompt("新しいボード名を入力してください:", board.name);
+        if (!nextName || !nextName.trim()) return;
+        board.name = nextName.trim();
+        if (board.id === state.activeBoardId) state.title = board.name;
+        saveToStorage();
+        renderBoardManager();
+        renderApp();
+        showToast("ボード名を変更しました", "✏️");
+      }
+
+      function deleteBoard(boardId) {
+        if (state.boards.length <= 1) {
+          showToast("最低1つのボードが必要です", "⚠️");
+          return;
+        }
+        const board = state.boards.find(item => item.id === boardId);
+        if (!board) return;
+        if (!confirm(`「${board.name}」を削除しますか？\nこのボードの投稿、セクション、設定も削除されます。`)) return;
+        state.boards = state.boards.filter(item => item.id !== boardId);
+        if (boardId === state.activeBoardId) {
+          const nextBoard = [...state.boards].sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))[0];
+          state.activeBoardId = nextBoard.id;
+          state.title = nextBoard.name;
+          state.description = nextBoard.description;
+          state.theme = nextBoard.theme;
+          state.currentView = nextBoard.currentView;
+          state.sections = nextBoard.sections;
+          state.cards = nextBoard.posts;
+          updateBoardUrl(nextBoard.id, true);
+        }
+        saveToStorage();
+        renderBoardManager();
+        renderApp();
+        showToast("ボードを削除しました", "🗑️");
+      }
+
       function getFilteredCards() {
         return state.cards.filter(card => {
+          const hidden = card.isHidden === true;
+          if (!isTeacherMode() && hidden) return false;
+          if (isTeacherMode() && visibilityFilter === "visible" && hidden) return false;
+          if (isTeacherMode() && visibilityFilter === "hidden" && !hidden) return false;
           // Color filter
           if (state.colorFilter !== "all" && card.color !== state.colorFilter) {
             return false;
@@ -2019,6 +3234,13 @@
       }
 
       function renderApp() {
+        const activeTeacherMode = isTeacherMode();
+        teacherModeBadge.textContent = activeTeacherMode ? "🛡️ 先生モード" : "👤 児童モード";
+        modeSwitchBtn.textContent = activeTeacherMode ? "児童モードへ戻る" : "先生モードへ";
+        modeSwitchBtn.setAttribute("aria-label", activeTeacherMode ? "児童モードへ戻る" : "先生モードへ");
+        document.querySelectorAll(".visibility-filter-btn").forEach(button => {
+          button.classList.toggle("active", button.dataset.visibilityFilter === visibilityFilter);
+        });
         // Update header info
         boardTitleDisplay.textContent = state.title;
         boardDescDisplay.textContent = state.description;
@@ -2283,6 +3505,38 @@
         showToast("セクションを削除しました");
       }
 
+      async function deletePost(card) {
+        if (!canDeletePost(card)) {
+          showToast("この投稿を削除できる権限がありません。", "⚠️");
+          return;
+        }
+        if (!confirm(`「${card.title}」を削除しますか？`)) return;
+        if (isOnlineBoard()) {
+          try {
+            await window.PadletSupabase.deletePost(card.id, state.activeBoardId);
+          } catch (error) {
+            showToast("オンライン投稿を削除できませんでした。", "⚠️");
+            console.warn("Supabase post deletion failed:", error.message);
+            return;
+          }
+        }
+        state.cards = state.cards.filter(item => item.id !== card.id);
+        saveToStorage();
+        renderApp();
+        showToast("投稿を削除しました", "🗑️");
+      }
+
+      function setPostVisibility(card) {
+        if (!canManageVisibility()) {
+          showToast("投稿の表示状態を変更できるのは先生だけです。", "⚠️");
+          return;
+        }
+        card.isHidden = card.isHidden !== true;
+        saveToStorage();
+        renderApp();
+        showToast(card.isHidden ? "投稿を非表示にしました" : "投稿を再表示しました", card.isHidden ? "🙈" : "👁️");
+      }
+
       // ======================================================================
       // Create Individual Card DOM Element
       // ======================================================================
@@ -2290,6 +3544,10 @@
         const el = document.createElement("div");
         el.className = `card card-color-${card.color || 'yellow'}`;
         el.id = card.id;
+        const studentNumber = Number(card.studentNumber);
+        const studentLabel = Number.isInteger(studentNumber) && studentNumber > 0
+          ? `No.${studentNumber}`
+          : "No.--";
 
         if (isCanvas) {
           el.classList.add("in-canvas");
@@ -2376,31 +3634,47 @@
 
         // Comments count
         const commentsCount = (card.comments || []).length;
-
-        // Card HTML Skeleton
-        el.innerHTML = `
-          ${pinBadge}
-          <div class="card-header">
-            <div class="card-user-info">
-              <div class="card-avatar">${(card.title || 'P').charAt(0).toUpperCase()}</div>
-              <div class="card-meta">
-                <span class="card-author">${escapeHtml(card.author || 'メンバー')}</span>
-                <span class="card-date">${formatRelativeTime(card.createdAt)}</span>
-              </div>
-            </div>
-            <div style="display: flex; align-items: center; gap: 2px;">
+        const hiddenPost = card.isHidden === true;
+        const hiddenLabelHtml = isTeacherMode() && hiddenPost
+          ? `<span class="hidden-post-label">非表示</span>`
+          : "";
+        const editButtonHtml = canEditPost(card) ? `
               <button class="card-menu-btn edit-card-btn" title="編集">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                   <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                 </svg>
               </button>
+            ` : "";
+        const deleteButtonHtml = canDeletePost(card) ? `
               <button class="card-menu-btn delete-card-btn" title="削除">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="3 6 5 6 21 6"></polyline>
                   <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                 </svg>
               </button>
+            ` : "";
+        const visibilityButtonHtml = canManageVisibility() ? `
+              <button class="card-menu-btn visibility-post-btn" title="${hiddenPost ? "表示" : "非表示"}">
+                ${hiddenPost ? "表示" : "非表示"}
+              </button>
+            ` : "";
+
+        // Card HTML Skeleton
+        el.innerHTML = `
+          ${pinBadge}
+          <div class="card-header">
+            <div class="card-user-info">
+              <div class="card-avatar">${studentLabel.replace("No.", "")}</div>
+              <div class="card-meta">
+                <span class="card-author">${studentLabel} ${hiddenLabelHtml}</span>
+                <span class="card-date">${formatRelativeTime(card.createdAt)}</span>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 2px;">
+              ${editButtonHtml}
+              ${visibilityButtonHtml}
+              ${deleteButtonHtml}
             </div>
           </div>
 
@@ -2526,21 +3800,33 @@
         });
 
         // Event: Edit Card
-        el.querySelector(".edit-card-btn").addEventListener("click", (e) => {
-          e.stopPropagation();
-          openPostModal(card);
-        });
+        const editCardBtn = el.querySelector(".edit-card-btn");
+        if (editCardBtn) {
+          editCardBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            if (!canEditPost(card)) {
+              showToast("この投稿を編集できるのは投稿者本人だけです。", "⚠️");
+              return;
+            }
+            openPostModal(card);
+          });
+        }
 
         // Event: Delete Card
-        el.querySelector(".delete-card-btn").addEventListener("click", (e) => {
-          e.stopPropagation();
-          if (confirm(`「${card.title}」を削除しますか？`)) {
-            state.cards = state.cards.filter(c => c.id !== card.id);
-            saveToStorage();
-            renderApp();
-            showToast("カードを削除しました", "🗑️");
-          }
-        });
+        const deleteCardBtn = el.querySelector(".delete-card-btn");
+        if (deleteCardBtn) {
+          deleteCardBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            deletePost(card);
+          });
+        }
+        const visibilityPostBtn = el.querySelector(".visibility-post-btn");
+        if (visibilityPostBtn) {
+          visibilityPostBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            setPostVisibility(card);
+          });
+        }
 
         return el;
       }
@@ -2551,6 +3837,10 @@
       let initialModalCoords = null;
 
       function openPostModal(cardToEdit = null, defaultSecId = null, coords = null) {
+        if (cardToEdit && !canEditPost(cardToEdit)) {
+          showToast("この投稿を編集できるのは投稿者本人だけです。", "⚠️");
+          return;
+        }
         state.editingCardId = cardToEdit ? cardToEdit.id : null;
         initialModalCoords = coords;
 
@@ -2565,6 +3855,10 @@
         if (cardToEdit) {
           postModalTitle.textContent = "カードを編集";
           cardIdInput.value = cardToEdit.id;
+          studentNumberInput.disabled = true;
+          studentNumberInput.value = Number.isInteger(Number(cardToEdit.studentNumber)) && Number(cardToEdit.studentNumber) > 0
+            ? Number(cardToEdit.studentNumber)
+            : "";
           cardTitleInput.value = cardToEdit.title || "";
           cardSectionSelect.value = cardToEdit.sectionId || (state.sections[0] ? state.sections[0].id : "");
           cardContentInput.value = cardToEdit.content || "";
@@ -2594,6 +3888,8 @@
           postModalTitle.textContent = "新しいカードを投稿";
           postForm.reset();
           cardIdInput.value = "";
+          studentNumberInput.disabled = false;
+          studentNumberInput.value = currentStudentNumber || "";
           if (defaultSecId) {
             cardSectionSelect.value = defaultSecId;
           }
@@ -2603,13 +3899,14 @@
         }
 
         postModal.classList.add("active");
-        setTimeout(() => cardTitleInput.focus(), 150);
+        setTimeout(() => studentNumberInput.focus(), 150);
       }
 
       function closePostModal() {
         postModal.classList.remove("active");
         state.editingCardId = null;
         state.activeImageBase64 = "";
+        studentNumberInput.disabled = false;
       }
 
       function selectColorSwatch(color) {
@@ -2678,10 +3975,29 @@
       });
 
       // Post Form Submission
-      postForm.addEventListener("submit", (e) => {
+      postForm.addEventListener("submit", async (e) => {
         e.preventDefault();
         const title = cardTitleInput.value.trim();
         if (!title) return;
+        const editingCard = state.editingCardId
+          ? state.cards.find(card => card.id === state.editingCardId)
+          : null;
+        if (editingCard && !canEditPost(editingCard)) {
+          closePostModal();
+          showToast("この投稿を編集できるのは投稿者本人だけです。", "⚠️");
+          return;
+        }
+        const studentNumber = editingCard
+          ? getValidStudentNumber(editingCard.studentNumber)
+          : getValidStudentNumber(studentNumberInput.value);
+        if (!studentNumber) {
+          studentNumberInput.setCustomValidity("出席番号は1以上の整数で入力してください。");
+          studentNumberInput.reportValidity();
+          studentNumberInput.focus();
+          return;
+        }
+        studentNumberInput.setCustomValidity("");
+        if (!editingCard) setCurrentStudentNumber(studentNumber);
 
         // Extract checklist
         const checklistItems = [];
@@ -2701,26 +4017,53 @@
 
         // Final image url
         let finalImage = state.activeImageBase64 || cardImageUrlInput.value.trim();
+        let onlinePost = null;
 
-        if (state.editingCardId) {
-          // Edit existing card
-          const card = state.cards.find(c => c.id === state.editingCardId);
-          if (card) {
-            card.title = title;
-            card.sectionId = cardSectionSelect.value;
-            card.content = cardContentInput.value.trim();
-            card.color = getSelectedCardColor();
-            card.imageUrl = finalImage;
-            card.linkUrl = cardLinkInput.value.trim();
-            card.checklist = checklistItems;
-            card.tags = tags;
-            card.pinned = cardPinnedInput.checked;
+        if (isOnlineBoard()) {
+          try {
+            const onlinePayload = getOnlinePostPayload(editingCard || {}, studentNumber, {
+              title,
+              sectionId: null,
+              content: cardContentInput.value.trim(),
+              color: getSelectedCardColor(),
+              imageUrl: finalImage,
+              linkUrl: cardLinkInput.value.trim(),
+              pinned: cardPinnedInput.checked,
+              canvasX: initialModalCoords ? initialModalCoords.x : (editingCard?.canvasX ?? 100),
+              canvasY: initialModalCoords ? initialModalCoords.y : (editingCard?.canvasY ?? 100)
+            });
+            onlinePost = editingCard
+              ? await window.PadletSupabase.updatePost(editingCard.id, onlinePayload)
+              : await window.PadletSupabase.createPost(onlinePayload);
+          } catch (error) {
+            showToast("オンライン投稿を保存できませんでした。", "⚠️");
+            console.warn("Supabase post save failed:", error.message);
+            return;
           }
+        }
+
+        if (editingCard) {
+          // Edit existing card
+          editingCard.title = title;
+          editingCard.sectionId = cardSectionSelect.value;
+          editingCard.content = cardContentInput.value.trim();
+          editingCard.color = getSelectedCardColor();
+          editingCard.imageUrl = finalImage;
+          editingCard.linkUrl = cardLinkInput.value.trim();
+          editingCard.checklist = checklistItems;
+          editingCard.tags = tags;
+          editingCard.pinned = cardPinnedInput.checked;
+          editingCard.lastEditedBy = isTeacherMode() ? "teacher" : "student";
+          editingCard.lastEditedAt = new Date().toISOString();
           showToast("カードを更新しました", "✏️");
         } else {
           // Create new card
           const newCard = {
-            id: generateId("card"),
+            id: onlinePost?.id || generateId("card"),
+            boardId: onlinePost?.board_id || null,
+            authorUserId: onlinePost?.author_user_id || null,
+            studentNumber: studentNumber,
+            isHidden: false,
             sectionId: cardSectionSelect.value || (state.sections[0] ? state.sections[0].id : "sec-default"),
             title: title,
             content: cardContentInput.value.trim(),
@@ -2732,11 +4075,12 @@
             pinned: cardPinnedInput.checked,
             likes: 0,
             isLiked: false,
-            createdAt: new Date().toISOString(),
-            canvasX: initialModalCoords ? initialModalCoords.x : (100 + Math.floor(Math.random() * 200)),
-            canvasY: initialModalCoords ? initialModalCoords.y : (100 + Math.floor(Math.random() * 200)),
+            createdAt: onlinePost?.created_at || new Date().toISOString(),
+            canvasX: onlinePost?.canvas_x ?? (initialModalCoords ? initialModalCoords.x : (100 + Math.floor(Math.random() * 200))),
+            canvasY: onlinePost?.canvas_y ?? (initialModalCoords ? initialModalCoords.y : (100 + Math.floor(Math.random() * 200))),
             comments: []
           };
+          state.cards = state.cards.filter(card => card.id !== newCard.id);
           state.cards.unshift(newCard);
           showToast("新しいカードを投稿しました！", "🎉");
         }
@@ -2769,6 +4113,160 @@
         }
       });
 
+      boardManagerBtn.addEventListener("click", openBoardManager);
+      closeBoardManagerBtn.addEventListener("click", closeBoardManager);
+      boardManagerModal.addEventListener("click", (e) => {
+        if (e.target === boardManagerModal) closeBoardManager();
+      });
+      boardSearchInput.addEventListener("input", renderBoardManager);
+      newBoardBtn.addEventListener("click", openNewBoardModal);
+      modeSwitchBtn.addEventListener("click", () => {
+        if (isTeacherMode()) {
+          setTeacherMode(false);
+          showToast("児童モードに戻りました", "👤");
+        } else {
+          openTeacherAuthModal();
+        }
+      });
+      teacherModeBtn.addEventListener("click", () => {
+        if (isTeacherMode()) {
+          setTeacherMode(false);
+          renderBoardManager();
+          showToast("児童モードに戻りました", "👤");
+        } else {
+          openTeacherAuthModal();
+        }
+      });
+      closeTeacherAuthBtn.addEventListener("click", closeTeacherAuthModal);
+      cancelTeacherAuthBtn.addEventListener("click", closeTeacherAuthModal);
+      teacherAuthModal.addEventListener("click", (e) => {
+        if (e.target === teacherAuthModal) closeTeacherAuthModal();
+      });
+      teacherAuthForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        teacherAuthError.textContent = "";
+        const password = teacherPasswordInput.value;
+        const storedHash = getTeacherPasswordHash();
+        try {
+          const passwordHash = await hashTeacherPassword(password);
+          if (!storedHash) {
+            if (!password || password !== teacherPasswordConfirmInput.value) {
+              teacherAuthError.textContent = "パスワードが一致しません。";
+              return;
+            }
+            localStorage.setItem(TEACHER_AUTH_STORAGE_KEY, JSON.stringify({
+              passwordHash,
+              createdAt: new Date().toISOString()
+            }));
+            closeTeacherAuthModal();
+            setTeacherMode(true);
+            showToast("先生モードを設定しました", "🔐");
+            return;
+          }
+          if (passwordHash !== storedHash) {
+            teacherAuthError.textContent = "パスワードが正しくありません。";
+            return;
+          }
+          closeTeacherAuthModal();
+          setTeacherMode(true);
+          showToast("先生モードになりました", "🔐");
+        } catch (error) {
+          teacherAuthError.textContent = error.message;
+        }
+      });
+      closeNewBoardBtn.addEventListener("click", closeNewBoardModal);
+      cancelNewBoardBtn.addEventListener("click", closeNewBoardModal);
+      newBoardModal.addEventListener("click", (e) => {
+        if (e.target === newBoardModal) closeNewBoardModal();
+      });
+      [recentBoardList, allBoardList].forEach(list => {
+        list.addEventListener("click", (e) => {
+          const button = e.target.closest("button[data-board-id]");
+          if (!button) return;
+          const boardId = button.dataset.boardId;
+          if (button.classList.contains("board-rename-btn")) renameBoard(boardId);
+          if (button.classList.contains("board-delete-btn")) deleteBoard(boardId);
+          if (button.classList.contains("board-share-btn")) openShareBoardModal(boardId);
+          if (button.classList.contains("board-open-btn")) switchBoard(boardId);
+        });
+      });
+      closeShareBoardBtn.addEventListener("click", closeShareBoardModal);
+      cancelShareBoardBtn.addEventListener("click", closeShareBoardModal);
+      shareBoardModal.addEventListener("click", (e) => {
+        if (e.target === shareBoardModal) closeShareBoardModal();
+      });
+      copyShareUrlBtn.addEventListener("click", copyShareUrl);
+      showQrCodeBtn.addEventListener("click", () => {
+        qrCodeWrap.classList.add("visible");
+      });
+      printQrCodeBtn.addEventListener("click", () => {
+        qrCodeWrap.classList.add("visible");
+        window.print();
+      });
+      newBoardForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const name = newBoardNameInput.value.trim();
+        if (!name) return;
+        const now = new Date().toISOString();
+        const description = newBoardDescriptionInput.value.trim();
+        let remoteBoard = null;
+        if (window.PadletSupabase?.isConfigured()) {
+          try {
+            await window.PadletSupabase.initialize();
+            remoteBoard = await window.PadletSupabase.createBoard({
+              name,
+              description,
+              theme: "theme-pastel",
+              currentView: "wall"
+            });
+            onlineBoardRole = "teacher";
+            onlineUserId = (await window.PadletSupabase.getCurrentUser())?.id || onlineUserId;
+          } catch (error) {
+            showToast("オンライン掲示板を作成できないため、この端末に保存します。", "⚠️");
+            console.warn("Supabase board creation failed:", error.message);
+          }
+        }
+        const newBoard = normalizeBoard(remoteBoard ? {
+          id: remoteBoard.id,
+          name: remoteBoard.name,
+          description: remoteBoard.description,
+          createdAt: remoteBoard.created_at || now,
+          updatedAt: remoteBoard.updated_at || now,
+          theme: remoteBoard.theme || "theme-pastel",
+          currentView: remoteBoard.current_view || "wall",
+          sections: DEMO_DATA.sections,
+          posts: []
+        } : {
+          id: generateId("board"),
+          name,
+          description,
+          createdAt: now,
+          updatedAt: now,
+          theme: "theme-pastel",
+          currentView: "wall",
+          sections: DEMO_DATA.sections,
+          posts: []
+        });
+        state.boards.push(newBoard);
+        closeNewBoardModal();
+        switchBoard(newBoard.id);
+      });
+
+      window.addEventListener("popstate", () => {
+        stopPostsRealtime();
+        if (applyBoardFromUrl()) {
+          closeBoardManager();
+          closeShareBoardModal();
+          renderApp();
+        }
+        initializeOnlineBoardContext().catch(error => {
+          console.warn("Supabase board navigation was skipped:", error.message);
+        });
+      });
+
+      window.addEventListener("pagehide", stopPostsRealtime);
+      window.addEventListener("beforeunload", stopPostsRealtime);
+
       // ======================================================================
       // Event Listeners & Interactions
       // ======================================================================
@@ -2798,6 +4296,14 @@
         });
       });
 
+      document.querySelectorAll(".visibility-filter-btn").forEach(button => {
+        button.addEventListener("click", () => {
+          if (!isTeacherMode()) return;
+          visibilityFilter = button.dataset.visibilityFilter;
+          renderApp();
+        });
+      });
+
       // Color swatches in modal
       document.querySelectorAll(".color-swatch-item").forEach(swatch => {
         swatch.addEventListener("click", () => {
@@ -2809,7 +4315,6 @@
       addChecklistItemBtn.addEventListener("click", () => addChecklistInputRow());
 
       // Open Modal Buttons
-      headerAddBtn.addEventListener("click", () => openPostModal());
       fabBtn.addEventListener("click", () => openPostModal());
 
       // Close Modal Buttons
@@ -2957,6 +4462,14 @@
             closePostModal();
           } else if (titleModal.classList.contains("active")) {
             titleModal.classList.remove("active");
+          } else if (newBoardModal.classList.contains("active")) {
+            closeNewBoardModal();
+          } else if (boardManagerModal.classList.contains("active")) {
+            closeBoardManager();
+          } else if (shareBoardModal.classList.contains("active")) {
+            closeShareBoardModal();
+          } else if (teacherAuthModal.classList.contains("active")) {
+            closeTeacherAuthModal();
           }
         }
       });
@@ -2964,8 +4477,17 @@
       // ======================================================================
       // Initialize Application
       // ======================================================================
+      loadCurrentStudentNumber();
       loadFromStorage();
+      const requestedBoardFound = applyBoardFromUrl();
       renderApp();
+      const hasBoardParameter = new URLSearchParams(window.location.search).has("board");
+      if (!hasBoardParameter || !requestedBoardFound) {
+        openBoardManager();
+      }
+      initializeOnlineBoardContext().catch(error => {
+        console.warn("Supabase Phase 1-A initialization was skipped:", error.message);
+      });
       console.log("Padlet MVP loaded successfully.");
     })();
   </script>
