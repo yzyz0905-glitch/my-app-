@@ -3417,12 +3417,12 @@
               作成日：${escapeHtml(formatBoardDate(board.createdAt))}<br>
               最終使用：${escapeHtml(formatBoardDate(board.updatedAt))}
             </div>
-            <div class="board-item-actions">
-              <button type="button" class="board-open-btn" data-board-id="${escapeHtml(board.id)}">開く</button>
-              <button type="button" class="board-share-btn" data-board-id="${escapeHtml(board.id)}">共有</button>
-              <button type="button" class="board-rename-btn" data-board-id="${escapeHtml(board.id)}">名前を変更</button>
-              <button type="button" class="board-delete-btn" data-board-id="${escapeHtml(board.id)}">削除</button>
-            </div>
+           <div class="board-item-actions">
+  　　　　　<button type="button" class="board-open-btn" data-board-id="${escapeHtml(board.id)}">開く</button>
+  　　　　　<button type="button" class="board-share-btn" data-board-id="${escapeHtml(board.id)}">共有</button>
+  　　　　　${isTeacherMode() ? `<button type="button" class="board-rename-btn" data-board-id="${escapeHtml(board.id)}">名前を変更</button>` : ""}
+  　　　　　${isTeacherMode() ? `<button type="button" class="board-delete-btn" data-board-id="${escapeHtml(board.id)}">削除</button>` : ""}
+　　　　　　</div>
           </article>
         `;
       }
@@ -3662,7 +3662,10 @@
       }
 
       function deleteBoard(boardId) {
-        if (state.boards.length <= 1) {
+               if (!isTeacherMode()) {
+          showToast("ボードの削除は先生モードで行ってください", "🔒");
+          return;
+        } if (state.boards.length <= 1) {
           showToast("最低1つのボードが必要です", "⚠️");
           return;
         }
