@@ -1523,12 +1523,18 @@
       font-size: 0.72rem;
       line-height: 1.5;
     }
-    .board-item-actions {
-      display: flex;
-      gap: 6px;
-      margin-top: auto;
-      padding-top: 4px;
-    }
+   .board-item-actions {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 6px;
+  margin-top: auto;
+  padding-top: 4px;
+}
+
+.board-item-actions button {
+  white-space: nowrap;
+  min-width: max-content;
+}
     .board-item-actions button {
       min-height: 34px;
       padding: 5px 9px;
@@ -3418,11 +3424,11 @@
               最終使用：${escapeHtml(formatBoardDate(board.updatedAt))}
             </div>
            <div class="board-item-actions">
-  　　　　　<button type="button" class="board-open-btn" data-board-id="${escapeHtml(board.id)}">開く</button>
-  　　　　　<button type="button" class="board-share-btn" data-board-id="${escapeHtml(board.id)}">共有</button>
-  　　　　　${isTeacherMode() ? `<button type="button" class="board-rename-btn" data-board-id="${escapeHtml(board.id)}">名前を変更</button>` : ""}
-  　　　　　${isTeacherMode() ? `<button type="button" class="board-delete-btn" data-board-id="${escapeHtml(board.id)}">削除</button>` : ""}
-　　　　　　</div>
+  <button type="button" class="board-open-btn" data-board-id="${escapeHtml(board.id)}">開く</button>
+  <button type="button" class="board-share-btn" data-board-id="${escapeHtml(board.id)}">共有</button>
+  ${isTeacherMode() ? `<button type="button" class="board-rename-btn" data-board-id="${escapeHtml(board.id)}">名前を変更</button>` : ""}
+  ${isTeacherMode() ? `<button type="button" class="board-delete-btn" data-board-id="${escapeHtml(board.id)}">削除</button>` : ""}
+</div>
           </article>
         `;
       }
