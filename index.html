@@ -3250,7 +3250,7 @@
         teacherPasswordConfirmGroup.hidden = hasPassword;
         teacherPasswordConfirmInput.required = !hasPassword;
         teacherAuthSubmitBtn.textContent = hasPassword ? "先生モードへ" : "設定して開始";
-        teacherAuthResetBtn.hidden = !hasPassword;
+        teacherAuthResetBtn.hidden = true;
         teacherAuthModal.classList.add("active");
         setTimeout(() => teacherPasswordInput.focus(), 120);
       }
@@ -5319,7 +5319,7 @@
             return;
           }
           if (passwordHash !== storedHash) {
-            teacherAuthError.textContent = "パスワードが正しくありません。パスワードをリセットして再設定できます。";
+            teacherAuthError.textContent = "パスワードが正しくありません。";
             return;
           }
           closeTeacherAuthModal();
