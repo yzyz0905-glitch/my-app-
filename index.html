@@ -413,6 +413,63 @@
       border-color: #1e293b;
       transform: scale(1.25);
     }
+    .color-pill[data-color="white"]:not(.active) {
+      border-color: #cbd5e1;
+    }
+    .color-filter-options {
+      display: contents;
+    }
+    .color-pill[data-color="all"] {
+      width: auto;
+      min-width: 48px;
+      height: 28px;
+      padding: 0 10px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-full);
+      background: var(--surface) !important;
+      color: var(--text-main);
+      font: 700 0.75rem var(--font-family);
+    }
+    .color-pill[data-color="all"].active {
+      border-color: var(--primary);
+      background: var(--primary) !important;
+      color: #ffffff;
+      transform: none;
+    }
+
+    .card-size-control {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      white-space: nowrap;
+    }
+    .card-size-label {
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+    .card-size-options {
+      display: inline-flex;
+      padding: 2px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-full);
+      background: var(--surface);
+    }
+    .card-size-btn {
+      min-width: 34px;
+      min-height: 26px;
+      padding: 3px 8px;
+      border: 0;
+      border-radius: var(--radius-full);
+      background: transparent;
+      color: var(--text-muted);
+      font: 700 0.75rem var(--font-family);
+      cursor: pointer;
+    }
+    .card-size-btn.active {
+      background: var(--primary);
+      color: #ffffff;
+    }
 
     .stat-badge {
       display: inline-flex;
@@ -482,6 +539,30 @@
       max-width: 1600px;
       margin: 0 auto;
     }
+    body[data-card-size="large"] .view-wall {
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 24px;
+    }
+    body[data-card-size="small"] .view-wall {
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 12px;
+    }
+
+    .view-wall > .card.wall-drop-before::before,
+    .view-wall > .card.wall-drop-after::after {
+      content: "";
+      position: absolute;
+      top: 10px;
+      bottom: 10px;
+      width: 4px;
+      background: var(--primary);
+      border-radius: 2px;
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    .view-wall > .card.wall-drop-before::before { left: 3px; }
+    .view-wall > .card.wall-drop-after::after { right: 3px; }
 
     /* 2. SECTIONS / SHELF VIEW (Kanban-style columns) */
     .view-sections {
@@ -496,6 +577,7 @@
 
     .section-column {
       flex: 0 0 320px;
+      position: relative;
       background: rgba(255, 255, 255, 0.7);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
@@ -510,6 +592,8 @@
       overflow: hidden;
       transition: background 0.2s, box-shadow 0.2s;
     }
+    body[data-card-size="large"] .section-column { flex-basis: 360px; }
+    body[data-card-size="small"] .section-column { flex-basis: 280px; }
     body.theme-dark .section-column,
     body.theme-blueprint .section-column {
       background: rgba(30, 41, 59, 0.8);
@@ -526,6 +610,22 @@
       box-shadow: 0 0 0 2px var(--primary);
     }
 
+    .section-column.section-reorder-before::before,
+    .section-column.section-reorder-after::after {
+      content: "";
+      position: absolute;
+      top: 8px;
+      bottom: 8px;
+      width: 4px;
+      background: var(--primary);
+      border-radius: 2px;
+      z-index: 4;
+      pointer-events: none;
+    }
+
+    .section-column.section-reorder-before::before { left: 2px; }
+    .section-column.section-reorder-after::after { right: 2px; }
+
     .section-header {
       padding: 14px 16px;
       display: flex;
@@ -535,6 +635,26 @@
       gap: 8px;
       flex: 0 0 auto;
     }
+
+    .section-drag-handle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 30px;
+      width: 30px;
+      height: 30px;
+      padding: 0;
+      border: 0;
+      border-radius: var(--radius-sm);
+      background: transparent;
+      color: var(--text-muted);
+      cursor: grab;
+      touch-action: none;
+    }
+
+    .section-drag-handle:hover { background: rgba(0, 0, 0, 0.06); }
+    .section-drag-handle:active { cursor: grabbing; }
+    .section-drag-handle:disabled { cursor: default; opacity: 0.45; }
 
     .section-title {
       font-weight: 700;
@@ -567,11 +687,40 @@
       overscroll-behavior: contain;
       -webkit-overflow-scrolling: touch;
       touch-action: pan-y;
+      position: relative;
     }
 
     .section-cards-list > .card {
       flex: 0 0 auto;
       width: 100%;
+    }
+
+    .section-cards-list > .card.drop-before::before,
+    .section-cards-list > .card.drop-after::after {
+      content: "";
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      height: 4px;
+      background: var(--primary);
+      border-radius: 2px;
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    .section-cards-list > .card.drop-before::before { top: 3px; }
+    .section-cards-list > .card.drop-after::after { bottom: 3px; }
+
+    .section-cards-list.drop-at-start::before {
+      content: "";
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      right: 12px;
+      height: 4px;
+      background: var(--primary);
+      border-radius: 2px;
+      pointer-events: none;
     }
 
     .section-add-card-btn {
@@ -684,6 +833,8 @@
       cursor: grab;
       z-index: 10;
     }
+    body[data-card-size="large"] .card.in-canvas { width: 340px; }
+    body[data-card-size="small"] .card.in-canvas { width: 260px; }
     .card.in-canvas:active {
       cursor: grabbing;
       z-index: 20;
@@ -706,6 +857,25 @@
     .card-color-dark .card-actions-btn { color: #cbd5e1; }
     .card-color-dark .card-footer { border-top-color: #334155; }
     .card-color-dark .comment-box { background: rgba(15, 23, 42, 0.6); }
+    body[data-card-size="large"] .card-header { padding: 16px 18px 10px; }
+    body[data-card-size="large"] .card-body { padding: 12px 18px 16px; gap: 10px; }
+    body[data-card-size="large"] .card-title { font-size: 1.12rem; }
+    body[data-card-size="large"] .card-content { font-size: 0.94rem; }
+    body[data-card-size="large"] .card-image-wrap { max-height: 260px; }
+    body[data-card-size="large"] .card-footer { padding: 10px 18px 12px; }
+    body[data-card-size="small"] .card-header { padding: 8px 10px 5px; gap: 6px; }
+    body[data-card-size="small"] .card-user-info { gap: 6px; }
+    body[data-card-size="small"] .card-avatar { width: 24px; height: 24px; font-size: 0.68rem; }
+    body[data-card-size="small"] .card-author { font-size: 0.76rem; }
+    body[data-card-size="small"] .card-date { font-size: 0.66rem; }
+    body[data-card-size="small"] .card-body { padding: 8px 10px 10px; gap: 6px; }
+    body[data-card-size="small"] .card-title { font-size: 0.94rem; }
+    body[data-card-size="small"] .card-content { font-size: 0.78rem; line-height: 1.45; }
+    body[data-card-size="small"] .card-image-wrap { max-height: 130px; }
+    body[data-card-size="small"] .card-link-preview { gap: 5px; padding: 6px 8px; }
+    body[data-card-size="small"] .card-footer { padding: 5px 8px 7px; gap: 4px; }
+    body[data-card-size="small"] .card-footer-left { gap: 3px; }
+    body[data-card-size="small"] .card-actions-btn { gap: 3px; padding: 3px 5px; font-size: 0.72rem; }
     body.theme-blueprint .card:not(.card-color-dark) {
       color: #1e293b;
     }
@@ -952,6 +1122,31 @@
     }
 
     /* Comments Section inside Card */
+    .latest-comment-preview {
+      display: grid;
+      gap: 2px;
+      padding: 7px 12px 9px;
+      border-top: 1px solid rgba(0, 0, 0, 0.05);
+      font-size: 0.78rem;
+    }
+    .latest-comment-preview[hidden] {
+      display: none;
+    }
+    .latest-comment-preview-author {
+      color: var(--text-muted);
+      font-size: 0.7rem;
+      font-weight: 700;
+    }
+    .latest-comment-preview-text {
+      color: var(--text-main);
+      line-height: 1.45;
+      overflow-wrap: anywhere;
+      white-space: pre-wrap;
+    }
+    body[data-card-size="small"] .latest-comment-preview {
+      padding: 5px 9px 7px;
+      font-size: 0.74rem;
+    }
     .card-comments-drawer {
       border-top: 1px solid rgba(0, 0, 0, 0.06);
       background: rgba(0, 0, 0, 0.02);
@@ -1471,18 +1666,29 @@
       height: 32px;
       border-radius: var(--radius-full);
       cursor: pointer;
-      border: 3px solid transparent;
-      transition: transform 0.15s, border-color 0.15s;
+      border: 1px solid rgba(15, 23, 42, 0.18);
+      display: inline-grid;
+      place-items: center;
+      padding: 0;
+      color: #0f172a;
+      font: 900 19px/1 var(--font-family);
+      transition: transform 0.15s, box-shadow 0.15s;
     }
     .color-swatch-item:hover {
       transform: scale(1.15);
     }
     .color-swatch-item.selected {
-      border-color: #1e293b;
-      transform: scale(1.15);
+      box-shadow: inset 0 0 0 2px rgba(15, 23, 42, 0.2);
     }
-    body.theme-dark .color-swatch-item.selected {
-      border-color: #ffffff;
+    .color-swatch-item.selected::after {
+      content: "✓";
+    }
+    .color-swatch-item[data-card-color="dark"] {
+      color: #ffffff;
+    }
+    .color-swatch-item:focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
     }
 
     /* Modal Footer */
@@ -1788,9 +1994,16 @@
         align-items: flex-start;
       }
       .filter-pills,
+      .card-size-control,
       .visibility-filter,
       .stat-badge {
         width: 100%;
+      }
+      .card-size-control { justify-content: space-between; }
+      body[data-card-size="large"] .view-wall,
+      body[data-card-size="medium"] .view-wall,
+      body[data-card-size="small"] .view-wall {
+        grid-template-columns: minmax(0, 1fr);
       }
       .board-viewport {
         padding: 16px 12px;
@@ -1960,14 +2173,16 @@
   <div class="filter-bar">
     <div class="filter-pills">
       <span class="filter-label">カラー絞り込み:</span>
-      <button class="color-pill active" data-color="all" style="background: #94a3b8;" title="すべて"></button>
-      <button class="color-pill" data-color="yellow" style="background: #fde68a;" title="イエロー"></button>
-      <button class="color-pill" data-color="rose" style="background: #fecdd3;" title="ローズ"></button>
-      <button class="color-pill" data-color="mint" style="background: #a7f3d0;" title="ミント"></button>
-      <button class="color-pill" data-color="blue" style="background: #bfdbfe;" title="ブルー"></button>
-      <button class="color-pill" data-color="purple" style="background: #ddd6fe;" title="パープル"></button>
-      <button class="color-pill" data-color="white" style="background: #ffffff; border: 1px solid #cbd5e1;" title="ホワイト"></button>
-      <button class="color-pill" data-color="dark" style="background: #1e293b;" title="ダーク"></button>
+      <button type="button" class="color-pill active" data-color="all" aria-label="すべてのカラー" aria-pressed="true" title="すべて">すべて</button>
+      <div class="color-filter-options" id="colorFilterOptions"></div>
+    </div>
+    <div class="card-size-control" role="group" aria-label="投稿カードの表示サイズ">
+      <span class="card-size-label">カードサイズ</span>
+      <div class="card-size-options">
+        <button type="button" class="card-size-btn" data-card-size="large" aria-pressed="false">大</button>
+        <button type="button" class="card-size-btn active" data-card-size="medium" aria-pressed="true">中</button>
+        <button type="button" class="card-size-btn" data-card-size="small" aria-pressed="false">小</button>
+      </div>
     </div>
     <div class="stat-badge">
       <span id="cardCountDisplay">0 件のカード</span>
@@ -2053,16 +2268,7 @@
         <!-- Color Palette -->
         <div class="form-group">
           <label class="form-label">カードの色</label>
-          <div class="color-swatches" id="colorSwatches">
-            <div class="color-swatch-item selected" data-card-color="yellow" style="background: #fef08a;" title="イエロー"></div>
-            <div class="color-swatch-item" data-card-color="rose" style="background: #fecdd3;" title="ローズ"></div>
-            <div class="color-swatch-item" data-card-color="mint" style="background: #a7f3d0;" title="ミント"></div>
-            <div class="color-swatch-item" data-card-color="blue" style="background: #bfdbfe;" title="ブルー"></div>
-            <div class="color-swatch-item" data-card-color="purple" style="background: #ddd6fe;" title="パープル"></div>
-            <div class="color-swatch-item" data-card-color="orange" style="background: #fed7aa;" title="オレンジ"></div>
-            <div class="color-swatch-item" data-card-color="white" style="background: #ffffff; border: 1px solid #cbd5e1;" title="ホワイト"></div>
-            <div class="color-swatch-item" data-card-color="dark" style="background: #1e293b;" title="ダーク"></div>
-          </div>
+          <div class="color-swatches" id="colorSwatches"></div>
         </div>
 
         <!-- Media Attachment Options -->
@@ -2193,6 +2399,7 @@
         <p class="form-error" id="teacherAuthError" role="alert"></p>
       </form>
       <div class="modal-footer">
+        <button type="button" class="btn-secondary" id="teacherAuthResetBtn" hidden>パスワードをリセット</button>
         <button type="button" class="btn-secondary" id="cancelTeacherAuthBtn">キャンセル</button>
         <button type="submit" form="teacherAuthForm" class="btn-primary" id="teacherAuthSubmitBtn">先生モードへ</button>
       </div>
@@ -2403,7 +2610,30 @@
       const STORAGE_KEY = "padlet_mvp_store_v1";
       const CURRENT_STUDENT_NUMBER_KEY = "padlet_current_student_number_v1";
       const TEACHER_AUTH_STORAGE_KEY = "padlet_teacher_auth_v1";
+      const CARD_SIZE_STORAGE_KEY = "padlet_card_size_v1";
+      const CARD_SIZE_OPTIONS = new Set(["large", "medium", "small"]);
+      const CARD_COLOR_OPTIONS = [
+        { value: "yellow", label: "イエロー", hex: "#fef08a" },
+        { value: "rose", label: "ローズ", hex: "#fecdd3" },
+        { value: "mint", label: "ミント", hex: "#a7f3d0" },
+        { value: "blue", label: "ブルー", hex: "#bfdbfe" },
+        { value: "purple", label: "パープル", hex: "#ddd6fe" },
+        { value: "orange", label: "オレンジ", hex: "#fed7aa" },
+        { value: "white", label: "ホワイト", hex: "#ffffff" },
+        { value: "dark", label: "ダーク", hex: "#1e293b" }
+      ];
       const BOARDS_STORAGE_VERSION = 2;
+
+      function loadCardSizePreference() {
+        try {
+          const savedSize = localStorage.getItem(CARD_SIZE_STORAGE_KEY);
+          return CARD_SIZE_OPTIONS.has(savedSize) ? savedSize : "medium";
+        } catch (error) {
+          return "medium";
+        }
+      }
+
+      let cardSize = loadCardSizePreference();
 
       let state = {
         boards: [],
@@ -2425,6 +2655,24 @@
       let onlineUserId = null;
       let onlineBoardRole = null;
       let postsRealtimeSubscription = null;
+      let activityRealtimeSubscription = null;
+      let isSavingSectionOrder = false;
+      let hasPendingSectionOrderRealtimeUpdate = false;
+      let isSavingWallOrder = false;
+      let draggingSectionCardId = null;
+      let draggingSectionPointerY = null;
+      const WALL_DRAG_DATA_TYPE = "application/x-padlet-wall-card";
+      let draggingWallCardId = null;
+      let draggingWallPointerX = null;
+      let draggingWallPointerY = null;
+      const SECTION_DRAG_DATA_TYPE = "application/x-padlet-section";
+      let onlineSectionOrderReady = false;
+      let isSavingSectionListOrder = false;
+      let draggedSectionId = null;
+      let draggingSectionPointerX = null;
+      let postLikesByPost = new Map();
+      let postCommentsByPost = new Map();
+      let postModerationByPost = new Map();
 
       function isSupabaseBoardId(boardId = state.activeBoardId) {
         return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(boardId || "");
@@ -2554,12 +2802,57 @@
       const boardViewport = document.getElementById("boardViewport");
       const viewTabs = document.querySelectorAll(".view-tab");
       const searchInput = document.getElementById("searchInput");
+      const colorFilterOptions = document.getElementById("colorFilterOptions");
+      const colorSwatches = document.getElementById("colorSwatches");
+      CARD_COLOR_OPTIONS.forEach(color => {
+        const filterButton = document.createElement("button");
+        filterButton.type = "button";
+        filterButton.className = "color-pill";
+        filterButton.dataset.color = color.value;
+        filterButton.style.backgroundColor = color.hex;
+        filterButton.setAttribute("aria-label", color.label);
+        filterButton.setAttribute("aria-pressed", "false");
+        filterButton.title = color.label;
+        colorFilterOptions.appendChild(filterButton);
+
+        const swatch = document.createElement("button");
+        swatch.type = "button";
+        swatch.className = "color-swatch-item";
+        swatch.dataset.cardColor = color.value;
+        swatch.style.backgroundColor = color.hex;
+        if (color.value === "white") swatch.style.borderColor = "#cbd5e1";
+        swatch.setAttribute("aria-label", color.label);
+        swatch.setAttribute("aria-pressed", "false");
+        swatch.title = color.label;
+        colorSwatches.appendChild(swatch);
+      });
       const colorPills = document.querySelectorAll(".color-pill");
+      const cardSizeButtons = document.querySelectorAll(".card-size-btn");
       const cardCountDisplay = document.getElementById("cardCountDisplay");
       const canvasHint = document.getElementById("canvasHint");
       const boardManagerBtn = document.getElementById("boardManagerBtn");
       const teacherModeBadge = document.getElementById("teacherModeBadge");
       const modeSwitchBtn = document.getElementById("modeSwitchBtn");
+
+      function setCardSize(size, persist = true) {
+        if (!CARD_SIZE_OPTIONS.has(size)) return;
+        cardSize = size;
+        body.dataset.cardSize = size;
+        cardSizeButtons.forEach(button => {
+          const selected = button.dataset.cardSize === size;
+          button.classList.toggle("active", selected);
+          button.setAttribute("aria-pressed", String(selected));
+        });
+        if (persist) {
+          try {
+            localStorage.setItem(CARD_SIZE_STORAGE_KEY, size);
+          } catch (error) {
+            // The current tab still keeps the selected display size.
+          }
+        }
+      }
+
+      setCardSize(cardSize, false);
 
       // Modals
       const postModal = document.getElementById("postModal");
@@ -2575,7 +2868,6 @@
       const cardLinkInput = document.getElementById("cardLinkInput");
       const cardTagsInput = document.getElementById("cardTagsInput");
       const cardPinnedInput = document.getElementById("cardPinnedInput");
-      const colorSwatches = document.getElementById("colorSwatches");
       const imagePreviewWrap = document.getElementById("imagePreviewWrap");
       const imagePreviewImg = document.getElementById("imagePreviewImg");
       const removeImageBtn = document.getElementById("removeImageBtn");
@@ -2637,17 +2929,74 @@
       }
 
       function canManageVisibility() {
-        return isTeacherMode();
+        return isOnlineBoard()
+          ? isTeacherMode() && onlineBoardRole === "teacher"
+          : isTeacherMode();
       }
 
-      function mapRemotePost(remotePost) {
+      function canReviewHiddenPosts() {
+        return canManageVisibility();
+      }
+
+      function canMoveCanvasCard() {
+        return isTeacherMode() && (!isOnlineBoard() || onlineBoardRole === "teacher");
+      }
+
+      async function saveCanvasCardPosition(card, element, previousX, previousY) {
+        const canvasX = element.offsetLeft;
+        const canvasY = element.offsetTop;
+        if (isOnlineBoard()) {
+          try {
+            await window.PadletSupabase.updatePostPosition(card.id, state.activeBoardId, canvasX, canvasY);
+          } catch (error) {
+            element.style.left = `${previousX}px`;
+            element.style.top = `${previousY}px`;
+            showToast("カードの位置を保存できませんでした。", "⚠️");
+            console.warn("Supabase canvas position update failed:", error.message);
+            return;
+          }
+        }
+        card.canvasX = canvasX;
+        card.canvasY = canvasY;
+        saveToStorage();
+      }
+
+      function mapRemoteComment(remoteComment) {
+        return {
+          id: remoteComment.id,
+          authorUserId: remoteComment.author_user_id,
+          author: remoteComment.author_label,
+          text: remoteComment.content,
+          time: remoteComment.created_at,
+          createdAt: remoteComment.created_at
+        };
+      }
+
+      function getLatestComment(comments = []) {
+        return [...comments].sort((left, right) => {
+          const leftTime = Date.parse(left.createdAt || left.time || "") || 0;
+          const rightTime = Date.parse(right.createdAt || right.time || "") || 0;
+          return rightTime - leftTime || String(right.id || "").localeCompare(String(left.id || ""));
+        })[0] || null;
+      }
+
+      function mapRemotePost(remotePost, existingCard = null) {
+        const likeUsers = postLikesByPost.get(remotePost.id);
+        const comments = postCommentsByPost.get(remotePost.id);
+        const hidden = postModerationByPost.get(remotePost.id);
         return {
           id: remotePost.id,
           boardId: remotePost.board_id,
           authorUserId: remotePost.author_user_id,
           studentNumber: remotePost.student_number,
-          isHidden: false,
+          isHidden: hidden === undefined ? existingCard?.isHidden === true : hidden,
           sectionId: remotePost.section_id || (state.sections[0] ? state.sections[0].id : ""),
+          displayOrder: remotePost.display_order === null || remotePost.display_order === undefined
+            ? null
+            : Number(remotePost.display_order),
+          wallDisplayOrder: remotePost.wall_display_order === null || remotePost.wall_display_order === undefined
+            ? null
+            : Number(remotePost.wall_display_order),
           title: remotePost.title || "",
           content: remotePost.content || "",
           color: remotePost.color || "yellow",
@@ -2655,16 +3004,55 @@
           linkUrl: remotePost.link_url || "",
           tags: [],
           pinned: Boolean(remotePost.pinned),
-          likes: 0,
-          isLiked: false,
+          likes: likeUsers ? likeUsers.size : (existingCard?.likes || 0),
+          isLiked: likeUsers ? likeUsers.has(onlineUserId) : existingCard?.isLiked === true,
           createdAt: remotePost.created_at,
           canvasX: Number(remotePost.canvas_x ?? 100),
           canvasY: Number(remotePost.canvas_y ?? 100),
-          checklist: [],
-          comments: [],
+          checklist: existingCard?.checklist || [],
+          comments: comments ? [...comments.values()] : (existingCard?.comments || []),
           lastEditedBy: remotePost.last_edited_by,
           lastEditedAt: remotePost.updated_at
         };
+      }
+
+      function hydrateOnlineActivity(boardData) {
+        postLikesByPost = new Map(boardData.posts.map(post => [post.id, new Set()]));
+        postCommentsByPost = new Map(boardData.posts.map(post => [post.id, new Map()]));
+        postModerationByPost = new Map(boardData.posts.map(post => [post.id, false]));
+
+        (boardData.likes || []).forEach(like => {
+          if (!postLikesByPost.has(like.post_id)) postLikesByPost.set(like.post_id, new Set());
+          postLikesByPost.get(like.post_id).add(like.user_id);
+        });
+        (boardData.comments || []).forEach(comment => {
+          if (!postCommentsByPost.has(comment.post_id)) postCommentsByPost.set(comment.post_id, new Map());
+          postCommentsByPost.get(comment.post_id).set(comment.id, mapRemoteComment(comment));
+        });
+        (boardData.moderation || []).forEach(moderation => {
+          postModerationByPost.set(moderation.post_id, moderation.is_hidden === true);
+        });
+      }
+
+      function syncOnlineActivityToCard(card) {
+        const likes = postLikesByPost.get(card.id);
+        const comments = postCommentsByPost.get(card.id);
+        if (likes) {
+          card.likes = likes.size;
+          card.isLiked = likes.has(onlineUserId);
+        }
+        if (comments) card.comments = [...comments.values()];
+        if (postModerationByPost.has(card.id)) {
+          card.isHidden = postModerationByPost.get(card.id) === true;
+        }
+      }
+
+      function rerenderRemoteActivity(postId) {
+        const card = state.cards.find(item => item.id === postId);
+        if (!card) return;
+        syncOnlineActivityToCard(card);
+        saveToStorage();
+        renderApp();
       }
 
       function handleRemotePostChange(payload) {
@@ -2673,12 +3061,19 @@
         const remotePost = eventType === "DELETE" ? payload.old : payload.new;
         if (!remotePost) return;
         if (eventType !== "DELETE" && remotePost.board_id !== state.activeBoardId) return;
-
+        if (isSavingSectionOrder) {
+          hasPendingSectionOrderRealtimeUpdate = true;
+          return;
+        }
         if (eventType === "DELETE") {
           state.cards = state.cards.filter(card => card.id !== remotePost.id);
+          postLikesByPost.delete(remotePost.id);
+          postCommentsByPost.delete(remotePost.id);
+          postModerationByPost.delete(remotePost.id);
         } else {
-          const nextCard = mapRemotePost(remotePost);
-          const existingIndex = state.cards.findIndex(card => card.id === nextCard.id);
+          const existingIndex = state.cards.findIndex(card => card.id === remotePost.id);
+          const existingCard = existingIndex === -1 ? null : state.cards[existingIndex];
+          const nextCard = mapRemotePost(remotePost, existingCard);
           if (existingIndex === -1) {
             state.cards.unshift(nextCard);
           } else {
@@ -2689,10 +3084,45 @@
         renderApp();
       }
 
+      function handleRemoteLikeChange(payload) {
+        const eventType = payload.eventType;
+        const like = eventType === "DELETE" ? payload.old : payload.new;
+        if (!like || !state.cards.some(card => card.id === like.post_id)) return;
+        if (!postLikesByPost.has(like.post_id)) postLikesByPost.set(like.post_id, new Set());
+        const users = postLikesByPost.get(like.post_id);
+        if (eventType === "DELETE") users.delete(like.user_id);
+        else users.add(like.user_id);
+        rerenderRemoteActivity(like.post_id);
+      }
+
+      function handleRemoteCommentChange(payload) {
+        const eventType = payload.eventType;
+        const comment = eventType === "DELETE" ? payload.old : payload.new;
+        if (!comment || comment.board_id !== state.activeBoardId) return;
+        if (!state.cards.some(card => card.id === comment.post_id)) return;
+        if (!postCommentsByPost.has(comment.post_id)) postCommentsByPost.set(comment.post_id, new Map());
+        const comments = postCommentsByPost.get(comment.post_id);
+        if (eventType === "DELETE") comments.delete(comment.id);
+        else comments.set(comment.id, mapRemoteComment(comment));
+        rerenderRemoteActivity(comment.post_id);
+      }
+
+      function handleRemoteModerationChange(payload) {
+        const eventType = payload.eventType;
+        const moderation = eventType === "DELETE" ? payload.old : payload.new;
+        if (!moderation || !state.cards.some(card => card.id === moderation.post_id)) return;
+        postModerationByPost.set(moderation.post_id, eventType !== "DELETE" && moderation.is_hidden === true);
+        rerenderRemoteActivity(moderation.post_id);
+      }
+
       function stopPostsRealtime() {
         if (postsRealtimeSubscription) {
           postsRealtimeSubscription.unsubscribe();
           postsRealtimeSubscription = null;
+        }
+        if (activityRealtimeSubscription) {
+          activityRealtimeSubscription.unsubscribe();
+          activityRealtimeSubscription = null;
         }
       }
 
@@ -2702,17 +3132,65 @@
         postsRealtimeSubscription = window.PadletSupabase.subscribeToPosts(boardId, {
           posts: handleRemotePostChange
         });
+        activityRealtimeSubscription = window.PadletSupabase.subscribeToBoardActivity(boardId, {
+          likes: handleRemoteLikeChange,
+          comments: handleRemoteCommentChange,
+          moderation: handleRemoteModerationChange
+        });
       }
 
       async function loadOnlinePosts(boardId = state.activeBoardId) {
         if (!window.PadletSupabase?.isConfigured() || !isSupabaseBoardId(boardId)) return;
-        const remotePosts = await window.PadletSupabase.fetchPosts(boardId);
+        const [boardData, membershipRole] = await Promise.all([
+          window.PadletSupabase.fetchBoardData(boardId),
+          window.PadletSupabase.getBoardMembershipRole(boardId)
+        ]);
         if (state.activeBoardId !== boardId) return;
-        state.cards = remotePosts.map(mapRemotePost);
+        onlineUserId = boardData.currentUserId;
+        onlineBoardRole = membershipRole;
+        const mappedSections = mapOnlineSections(boardData.sections, state.sections);
+        onlineSectionOrderReady = Boolean(mappedSections);
+        if (mappedSections) state.sections = mappedSections;
+        hydrateOnlineActivity(boardData);
+        const previousCards = new Map(state.cards.map(card => [card.id, card]));
+        state.cards = boardData.posts.map(post => mapRemotePost(post, previousCards.get(post.id)));
         const activeBoard = getActiveBoard();
         if (activeBoard) activeBoard.posts = state.cards;
         saveToStorage();
         renderApp();
+      }
+
+      function mapOnlineSections(remoteSections, localSections) {
+        if (!Array.isArray(remoteSections)
+          || remoteSections.length === 0
+          || remoteSections.length !== localSections.length) return null;
+
+        const localSectionIndexes = new Map(localSections.map((section, index) => [section.id, index]));
+        const mappedLocalIndexes = new Map();
+        const matchedLocalIds = new Set();
+        const mappedSections = [];
+        for (const remoteSection of remoteSections) {
+          const localSection = localSections.find(section => !matchedLocalIds.has(section.id)
+            && (section.id === remoteSection.id
+              || section.id === remoteSection.legacy_id
+              || (section.legacyId != null
+                && remoteSection.legacy_id != null
+                && section.legacyId === remoteSection.legacy_id)));
+          if (!localSection) return null;
+          matchedLocalIds.add(localSection.id);
+          mappedLocalIndexes.set(remoteSection.id, localSectionIndexes.get(localSection.id));
+          mappedSections.push({
+            ...localSection,
+            id: remoteSection.id,
+            legacyId: remoteSection.legacy_id || localSection.legacyId || localSection.id,
+            sortOrder: Number(remoteSection.sort_order)
+          });
+        }
+        if (matchedLocalIds.size !== localSections.length) return null;
+        return mappedSections.sort((left, right) => {
+          const orderDifference = left.sortOrder - right.sortOrder;
+          return orderDifference || mappedLocalIndexes.get(left.id) - mappedLocalIndexes.get(right.id);
+        });
       }
 
       function getOnlinePostPayload(card, studentNumber, fields = {}) {
@@ -2772,6 +3250,7 @@
         teacherPasswordConfirmGroup.hidden = hasPassword;
         teacherPasswordConfirmInput.required = !hasPassword;
         teacherAuthSubmitBtn.textContent = hasPassword ? "先生モードへ" : "設定して開始";
+        teacherAuthResetBtn.hidden = !hasPassword;
         teacherAuthModal.classList.add("active");
         setTimeout(() => teacherPasswordInput.focus(), 120);
       }
@@ -2820,6 +3299,7 @@
       const teacherPasswordConfirmInput = document.getElementById("teacherPasswordConfirmInput");
       const teacherAuthError = document.getElementById("teacherAuthError");
       const teacherAuthSubmitBtn = document.getElementById("teacherAuthSubmitBtn");
+      const teacherAuthResetBtn = document.getElementById("teacherAuthResetBtn");
       const shareBoardModal = document.getElementById("shareBoardModal");
       const closeShareBoardBtn = document.getElementById("closeShareBoardBtn");
       const cancelShareBoardBtn = document.getElementById("cancelShareBoardBtn");
@@ -3160,8 +3640,7 @@
         const localBoard = mergeRemoteBoard(remoteResult.board);
         activateBoard(localBoard);
         updateBoardUrl(localBoard.id, true);
-        const remotePosts = await api.fetchPosts(localBoard.id);
-        state.cards = remotePosts.map(mapRemotePost);
+        await loadOnlinePosts(localBoard.id);
         localBoard.posts = state.cards;
         saveToStorage();
         closeBoardManager();
@@ -3209,11 +3688,12 @@
       }
 
       function getFilteredCards() {
+        const canReviewHidden = canReviewHiddenPosts();
         return state.cards.filter(card => {
           const hidden = card.isHidden === true;
-          if (!isTeacherMode() && hidden) return false;
-          if (isTeacherMode() && visibilityFilter === "visible" && hidden) return false;
-          if (isTeacherMode() && visibilityFilter === "hidden" && !hidden) return false;
+          if (!canReviewHidden && hidden) return false;
+          if (canReviewHidden && visibilityFilter === "visible" && hidden) return false;
+          if (canReviewHidden && visibilityFilter === "hidden" && !hidden) return false;
           // Color filter
           if (state.colorFilter !== "all" && card.color !== state.colorFilter) {
             return false;
@@ -3234,13 +3714,27 @@
       }
 
       function renderApp() {
+        const openCommentCardIds = new Set(
+          Array.from(viewContainer.querySelectorAll(".card-comments-drawer.open"))
+            .map(drawer => drawer.closest(".card")?.id)
+            .filter(Boolean)
+        );
         const activeTeacherMode = isTeacherMode();
         teacherModeBadge.textContent = activeTeacherMode ? "🛡️ 先生モード" : "👤 児童モード";
         modeSwitchBtn.textContent = activeTeacherMode ? "児童モードへ戻る" : "先生モードへ";
         modeSwitchBtn.setAttribute("aria-label", activeTeacherMode ? "児童モードへ戻る" : "先生モードへ");
+        colorPills.forEach(button => {
+          const selected = button.dataset.color === state.colorFilter;
+          button.classList.toggle("active", selected);
+          button.setAttribute("aria-pressed", String(selected));
+        });
         document.querySelectorAll(".visibility-filter-btn").forEach(button => {
           button.classList.toggle("active", button.dataset.visibilityFilter === visibilityFilter);
         });
+        const visibilityFilterContainer = document.getElementById("visibilityFilter");
+        if (visibilityFilterContainer) {
+          visibilityFilterContainer.style.display = canReviewHiddenPosts() ? "" : "none";
+        }
         // Update header info
         boardTitleDisplay.textContent = state.title;
         boardDescDisplay.textContent = state.description;
@@ -3279,10 +3773,239 @@
         } else if (state.currentView === "canvas") {
           renderCanvasView(filteredCards);
         }
+
+        openCommentCardIds.forEach(cardId => {
+          const cardElement = Array.from(viewContainer.querySelectorAll(".card"))
+            .find(card => card.id === cardId);
+          if (!cardElement) return;
+          const drawer = cardElement.querySelector(".card-comments-drawer");
+          if (!drawer) return;
+          drawer.classList.add("open");
+          cardElement.querySelector(".toggle-comments-btn")?.setAttribute("aria-expanded", "true");
+          const preview = cardElement.querySelector(".latest-comment-preview");
+          if (preview) preview.hidden = true;
+        });
+      }
+
+      function hasWallDisplayOrder(card) {
+        return card.wallDisplayOrder !== null
+          && card.wallDisplayOrder !== undefined
+          && Number.isFinite(Number(card.wallDisplayOrder));
+      }
+
+      function compareWallCardOrder(left, right) {
+        const leftPinned = Boolean(left.pinned);
+        const rightPinned = Boolean(right.pinned);
+        if (leftPinned !== rightPinned) return leftPinned ? -1 : 1;
+
+        const leftHasOrder = hasWallDisplayOrder(left);
+        const rightHasOrder = hasWallDisplayOrder(right);
+        if (leftHasOrder && rightHasOrder) {
+          const orderDifference = Number(left.wallDisplayOrder) - Number(right.wallDisplayOrder);
+          if (orderDifference !== 0) return orderDifference;
+        } else if (leftHasOrder !== rightHasOrder) {
+          return leftHasOrder ? 1 : -1;
+        }
+
+        const leftCreatedAt = Date.parse(left.createdAt || "") || 0;
+        const rightCreatedAt = Date.parse(right.createdAt || "") || 0;
+        return rightCreatedAt - leftCreatedAt;
+      }
+
+      function getOrderedWallCards(cards) {
+        return [...cards].sort(compareWallCardOrder);
+      }
+
+      function clearWallDropIndicators() {
+        viewContainer.querySelectorAll(".wall-drop-before, .wall-drop-after").forEach(cardElement => {
+          cardElement.classList.remove("wall-drop-before", "wall-drop-after");
+          delete cardElement.dataset.wallDropPosition;
+        });
+      }
+
+      function getWallDropPosition(targetCardElement, clientX, clientY, previousPointerX, previousPointerY, previousPosition) {
+        const rect = targetCardElement.getBoundingClientRect();
+        const columnCount = getComputedStyle(viewContainer).gridTemplateColumns.trim().split(/\s+/).length;
+        const useVerticalAxis = columnCount <= 1;
+        const ratio = useVerticalAxis
+          ? Math.max(0, Math.min(1, (clientY - rect.top) / rect.height))
+          : Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+        const previousPointer = useVerticalAxis ? previousPointerY : previousPointerX;
+        const currentPointer = useVerticalAxis ? clientY : clientX;
+
+        if (previousPointer !== null && previousPointer !== currentPointer) {
+          if (currentPointer > previousPointer && ratio >= 0.4) return "after";
+          if (currentPointer < previousPointer && ratio <= 0.6) return "before";
+        }
+        if (previousPosition === "before" && ratio < 0.6) return "before";
+        if (previousPosition === "after" && ratio > 0.4) return "after";
+        return ratio < 0.5 ? "before" : "after";
+      }
+
+      function setupWallCardDragging(cardElement, card, enabled) {
+        cardElement.draggable = enabled;
+        if (!enabled) return;
+
+        cardElement.addEventListener("dragstart", (e) => {
+          const interactiveTarget = e.target instanceof Element
+            ? e.target.closest("button, input, textarea, select, a, label, [contenteditable='true'], .card-comments-drawer, .card-image-wrap, .tag-chip[data-tag], .checklist-item")
+            : null;
+          if (interactiveTarget) {
+            e.preventDefault();
+            return;
+          }
+          e.dataTransfer.setData(WALL_DRAG_DATA_TYPE, card.id);
+          e.dataTransfer.effectAllowed = "move";
+          draggingWallCardId = card.id;
+          draggingWallPointerX = e.clientX;
+          draggingWallPointerY = e.clientY;
+          cardElement.classList.add("dragging");
+        });
+        cardElement.addEventListener("dragend", () => {
+          clearWallDropIndicators();
+          draggingWallCardId = null;
+          draggingWallPointerX = null;
+          draggingWallPointerY = null;
+          cardElement.classList.remove("dragging");
+        });
+      }
+
+      function setupWallDropHandlers(wallCardDragEnabled) {
+        viewContainer.ondragover = (e) => {
+          if (!Array.from(e.dataTransfer.types).includes(WALL_DRAG_DATA_TYPE)) return;
+          const targetCardElement = e.target instanceof Element
+            ? e.target.closest(".view-wall > .card")
+            : null;
+          const draggedCard = state.cards.find(card => card.id === draggingWallCardId);
+          if (!wallCardDragEnabled
+            || isSavingWallOrder
+            || !draggedCard
+            || !targetCardElement
+            || targetCardElement.id === draggingWallCardId) {
+            clearWallDropIndicators();
+            return;
+          }
+          const targetCard = state.cards.find(card => card.id === targetCardElement.id);
+          if (!targetCard || targetCard.pinned !== draggedCard.pinned) {
+            clearWallDropIndicators();
+            return;
+          }
+
+          e.preventDefault();
+          e.stopPropagation();
+          const previousPosition = targetCardElement.dataset.wallDropPosition;
+          clearWallDropIndicators();
+          const dropPosition = getWallDropPosition(
+            targetCardElement,
+            e.clientX,
+            e.clientY,
+            draggingWallPointerX,
+            draggingWallPointerY,
+            previousPosition
+          );
+          draggingWallPointerX = e.clientX;
+          draggingWallPointerY = e.clientY;
+          targetCardElement.dataset.wallDropPosition = dropPosition;
+          targetCardElement.classList.add(dropPosition === "before" ? "wall-drop-before" : "wall-drop-after");
+          e.dataTransfer.dropEffect = "move";
+        };
+
+        viewContainer.ondragleave = (e) => {
+          if (!Array.from(e.dataTransfer.types).includes(WALL_DRAG_DATA_TYPE)) return;
+          if (e.relatedTarget instanceof Node && viewContainer.contains(e.relatedTarget)) return;
+          clearWallDropIndicators();
+        };
+
+        viewContainer.ondrop = (e) => {
+          if (!Array.from(e.dataTransfer.types).includes(WALL_DRAG_DATA_TYPE)) return;
+          const draggedCardId = e.dataTransfer.getData(WALL_DRAG_DATA_TYPE);
+          if (!draggedCardId || draggedCardId !== draggingWallCardId) return;
+          e.preventDefault();
+          e.stopPropagation();
+          const targetCardElement = e.target instanceof Element
+            ? e.target.closest(".view-wall > .card")
+            : null;
+          const targetId = targetCardElement?.id;
+          const dropPosition = targetCardElement?.dataset.wallDropPosition;
+          clearWallDropIndicators();
+          if (!wallCardDragEnabled || isSavingWallOrder || !targetId || !dropPosition) return;
+          void reorderWallCardsByDrag(draggedCardId, targetId, dropPosition);
+        };
+      }
+
+      async function reorderWallCardsByDrag(draggedCardId, targetCardId, position) {
+        if (isSavingWallOrder) return;
+        const draggedCard = state.cards.find(card => card.id === draggedCardId);
+        const targetCard = state.cards.find(card => card.id === targetCardId);
+        if (!draggedCard || !targetCard || Boolean(draggedCard.pinned) !== Boolean(targetCard.pinned)) return;
+
+        const isPinnedGroup = Boolean(draggedCard.pinned);
+        const pinnedCards = getOrderedWallCards(state.cards.filter(card => Boolean(card.pinned)));
+        const regularCards = getOrderedWallCards(state.cards.filter(card => !Boolean(card.pinned)));
+        const movingGroup = isPinnedGroup ? pinnedCards : regularCards;
+        const sourceIndex = movingGroup.findIndex(card => card.id === draggedCardId);
+        if (sourceIndex === -1) return;
+        const [movingCard] = movingGroup.splice(sourceIndex, 1);
+        const targetIndex = movingGroup.findIndex(card => card.id === targetCardId);
+        if (targetIndex === -1) return;
+        movingGroup.splice(targetIndex + (position === "after" ? 1 : 0), 0, movingCard);
+
+        const orderedCards = isPinnedGroup
+          ? [...movingGroup, ...regularCards]
+          : [...pinnedCards, ...movingGroup];
+        const previousOrder = getOrderedWallCards(state.cards);
+        if (orderedCards.every((card, index) => card.id === previousOrder[index]?.id)) return;
+        const normalizedCards = orderedCards.map((card, wallDisplayOrder) => ({ ...card, wallDisplayOrder }));
+
+        if (!isOnlineBoard()) {
+          normalizedCards.forEach(orderedCard => {
+            const stateCard = state.cards.find(card => card.id === orderedCard.id);
+            if (stateCard) stateCard.wallDisplayOrder = orderedCard.wallDisplayOrder;
+          });
+          saveToStorage();
+          renderApp();
+          showToast("Wallのカード順を変更しました");
+          return;
+        }
+
+        const boardId = state.activeBoardId;
+        let saveError = null;
+        let reloadError = null;
+        isSavingWallOrder = true;
+        try {
+          await window.PadletSupabase.reorderBoardWallPosts(boardId, normalizedCards.map(card => card.id));
+        } catch (error) {
+          saveError = error;
+        }
+
+        try {
+          await loadOnlinePosts(boardId);
+        } catch (error) {
+          reloadError = error;
+        } finally {
+          isSavingWallOrder = false;
+        }
+
+        if (saveError) {
+          showToast(reloadError
+            ? "Wallの順番を保存できず、サーバー状態も取得できませんでした。再読み込みしてください。"
+            : "Wallの順番を保存できませんでした。サーバー上の順序を再表示しました。", "⚠️");
+          console.warn("Supabase Wall order update failed:", saveError.message);
+          if (reloadError) console.warn("Supabase Wall order refresh failed:", reloadError.message);
+          return;
+        }
+        if (reloadError) {
+          showToast("Wallの順番は保存されましたが、最新状態を取得できませんでした。再読み込みしてください。", "⚠️");
+          console.warn("Supabase Wall order refresh failed:", reloadError.message);
+          return;
+        }
+        showToast("Wallのカード順を保存しました");
       }
 
       // 1. Render Wall View (Masonry-like responsive grid)
       function renderWallView(cards) {
+        const wallCardDragEnabled = isTeacherMode() && (!isOnlineBoard() || onlineBoardRole === "teacher");
+        setupWallDropHandlers(wallCardDragEnabled);
         if (cards.length === 0) {
           viewContainer.innerHTML = `
             <div class="empty-state">
@@ -3298,42 +4021,344 @@
           return;
         }
 
-        // Sort: pinned cards first
-        const sorted = [...cards].sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
+        const sorted = getOrderedWallCards(cards);
         sorted.forEach(card => {
           const cardEl = createCardElement(card, false);
+          setupWallCardDragging(cardEl, card, wallCardDragEnabled);
           viewContainer.appendChild(cardEl);
         });
       }
 
+      function hasSectionDisplayOrder(card) {
+        return card.displayOrder !== null
+          && card.displayOrder !== undefined
+          && Number.isFinite(Number(card.displayOrder));
+      }
+
+      function compareSectionCardOrder(left, right) {
+        const leftHasOrder = hasSectionDisplayOrder(left);
+        const rightHasOrder = hasSectionDisplayOrder(right);
+        if (leftHasOrder && rightHasOrder) {
+          const orderDifference = Number(left.displayOrder) - Number(right.displayOrder);
+          if (orderDifference !== 0) return orderDifference;
+        } else if (leftHasOrder !== rightHasOrder) {
+          return leftHasOrder ? -1 : 1;
+        }
+
+        const leftCreatedAt = Date.parse(left.createdAt || "") || 0;
+        const rightCreatedAt = Date.parse(right.createdAt || "") || 0;
+        return rightCreatedAt - leftCreatedAt;
+      }
+
+      function getOrderedSectionCards(cards) {
+        return [...cards].sort(compareSectionCardOrder);
+      }
+
+      function clearSectionDropIndicator(sectionColumn) {
+        sectionColumn.querySelectorAll(".drop-before, .drop-after").forEach(card => {
+          card.classList.remove("drop-before", "drop-after");
+          delete card.dataset.dropPosition;
+        });
+        sectionColumn.querySelector(".section-cards-list")?.classList.remove("drop-at-start");
+      }
+
+      function getSectionDropPosition(targetCard, clientY, previousPointerY, previousPosition) {
+        const rect = targetCard.getBoundingClientRect();
+        const ratio = Math.max(0, Math.min(1, (clientY - rect.top) / rect.height));
+        if (previousPointerY !== null && previousPointerY !== clientY) {
+          if (clientY > previousPointerY && ratio >= 0.4) return "after";
+          if (clientY < previousPointerY && ratio <= 0.6) return "before";
+        }
+        if (previousPosition === "before" && ratio < 0.6) return "before";
+        if (previousPosition === "after" && ratio > 0.4) return "after";
+        return ratio < 0.5 ? "before" : "after";
+      }
+
+      function clearSectionReorderIndicators() {
+        viewContainer.querySelectorAll(".section-column").forEach(sectionColumn => {
+          sectionColumn.classList.remove("section-reorder-before", "section-reorder-after", "section-drag-source");
+          delete sectionColumn.dataset.sectionDropPosition;
+        });
+      }
+
+      function getSectionReorderDropPosition(sectionColumn, clientX, previousPointerX, previousPosition) {
+        const rect = sectionColumn.getBoundingClientRect();
+        const ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+        if (previousPointerX !== null && previousPointerX !== clientX) {
+          if (clientX > previousPointerX && ratio >= 0.4) return "after";
+          if (clientX < previousPointerX && ratio <= 0.6) return "before";
+        }
+        if (previousPosition === "before" && ratio < 0.6) return "before";
+        if (previousPosition === "after" && ratio > 0.4) return "after";
+        return ratio < 0.5 ? "before" : "after";
+      }
+
+      async function reorderSectionsByDrag(draggedId, targetId, position) {
+        if (isSavingSectionListOrder || draggedId === targetId) return;
+        if (isOnlineBoard() && !onlineSectionOrderReady) {
+          showToast("SectionとSupabaseの対応を確認できないため、並び替えを保存できません。", "⚠️");
+          return;
+        }
+
+        const nextSections = [...state.sections];
+        const sourceIndex = nextSections.findIndex(section => section.id === draggedId);
+        if (sourceIndex === -1) return;
+        const [movingSection] = nextSections.splice(sourceIndex, 1);
+        const targetIndex = nextSections.findIndex(section => section.id === targetId);
+        if (!movingSection || targetIndex === -1) return;
+        nextSections.splice(targetIndex + (position === "after" ? 1 : 0), 0, movingSection);
+        if (nextSections.every((section, index) => section.id === state.sections[index]?.id)) return;
+
+        const normalizedSections = nextSections.map((section, sortOrder) => ({ ...section, sortOrder }));
+        if (!isOnlineBoard()) {
+          state.sections = normalizedSections;
+          saveToStorage();
+          renderApp();
+          showToast("Sectionの順番を変更しました");
+          return;
+        }
+
+        const boardId = state.activeBoardId;
+        isSavingSectionListOrder = true;
+        try {
+          await window.PadletSupabase.reorderBoardSections(boardId, normalizedSections.map(section => section.id));
+          if (state.activeBoardId === boardId) {
+            state.sections = normalizedSections;
+            saveToStorage();
+            renderApp();
+          }
+          showToast("Sectionの順番を保存しました");
+        } catch (error) {
+          let refreshFailed = false;
+          let sectionMappingFailed = false;
+          try {
+            const remoteSections = await window.PadletSupabase.fetchSections(boardId);
+            const mappedSections = mapOnlineSections(remoteSections, state.sections);
+            if (state.activeBoardId === boardId && mappedSections) {
+              state.sections = mappedSections;
+              onlineSectionOrderReady = true;
+              saveToStorage();
+              renderApp();
+            } else if (state.activeBoardId === boardId) {
+              onlineSectionOrderReady = false;
+              sectionMappingFailed = true;
+            }
+          } catch (reloadError) {
+            refreshFailed = true;
+            console.warn("Supabase section order refresh failed:", reloadError.message);
+          }
+          showToast(refreshFailed
+            ? "Sectionの順番を保存できず、サーバー状態も再取得できませんでした。"
+            : sectionMappingFailed
+              ? "Sectionの順番を保存できず、Supabaseとの対応を確認できませんでした。"
+              : "Sectionの順番を保存できませんでした。サーバー上の順序を再取得しました。", "⚠️");
+          console.warn("Supabase section order update failed:", error.message);
+        } finally {
+          isSavingSectionListOrder = false;
+        }
+      }
+
+      async function reloadOnlinePostsAfterSectionOrderSave(boardId) {
+        do {
+          hasPendingSectionOrderRealtimeUpdate = false;
+          await loadOnlinePosts(boardId);
+        } while (hasPendingSectionOrderRealtimeUpdate && state.activeBoardId === boardId);
+      }
+
+      async function reorderCardsWithinSection(sectionId, draggedCardId, targetCardId, placeAfter) {
+        if (isSavingSectionOrder) return;
+        const draggedCard = state.cards.find(card => card.id === draggedCardId);
+        const targetCard = state.cards.find(card => card.id === targetCardId);
+        if (!draggedCard || !targetCard || draggedCard.sectionId !== sectionId || targetCard.sectionId !== sectionId) return;
+
+        const orderedCards = getOrderedSectionCards(state.cards.filter(card => card.sectionId === sectionId));
+        const sourceIndex = orderedCards.findIndex(card => card.id === draggedCardId);
+        if (sourceIndex === -1) return;
+        const [movingCard] = orderedCards.splice(sourceIndex, 1);
+        const targetIndex = orderedCards.findIndex(card => card.id === targetCardId);
+        if (targetIndex === -1) return;
+        orderedCards.splice(targetIndex + (placeAfter ? 1 : 0), 0, movingCard);
+
+        const previousOrder = getOrderedSectionCards(state.cards.filter(card => card.sectionId === sectionId));
+        if (orderedCards.every((card, index) => card.id === previousOrder[index]?.id)) return;
+
+        if (!isOnlineBoard()) {
+          orderedCards.forEach((card, index) => {
+            card.displayOrder = index;
+          });
+          saveToStorage();
+          renderApp();
+          showToast("カードの並び順を変更しました");
+          return;
+        }
+
+        const boardId = state.activeBoardId;
+        let saveError = null;
+        let reloadError = null;
+        isSavingSectionOrder = true;
+        try {
+          await Promise.all(orderedCards.map((card, index) =>
+            window.PadletSupabase.updatePostDisplayOrder(card.id, boardId, index)
+          ));
+        } catch (error) {
+          saveError = error;
+        }
+
+        try {
+          await reloadOnlinePostsAfterSectionOrderSave(boardId);
+        } catch (error) {
+          reloadError = error;
+        } finally {
+          isSavingSectionOrder = false;
+          hasPendingSectionOrderRealtimeUpdate = false;
+        }
+
+        if (saveError) {
+          showToast(reloadError
+            ? "並び順を保存できず、サーバーの状態も取得できませんでした。再読み込みしてください。"
+            : "並び順を保存できませんでした。サーバーの状態を再表示しました。", "⚠️");
+          console.warn("Supabase section order update failed:", saveError.message);
+          if (reloadError) console.warn("Supabase section order refresh failed:", reloadError.message);
+          return;
+        }
+        if (reloadError) {
+          showToast("並び順は保存されましたが、最新状態を取得できませんでした。再読み込みしてください。", "⚠️");
+          console.warn("Supabase section order refresh failed:", reloadError.message);
+          return;
+        }
+        showToast("カードの並び順を保存しました");
+      }
+
       // 2. Render Sections View (Kanban style columns)
       function renderSectionsView(cards) {
+        const sectionCardDragEnabled = isTeacherMode() && (!isOnlineBoard() || onlineBoardRole === "teacher");
+        const sectionReorderEnabled = isTeacherMode()
+          && (!isOnlineBoard() || (onlineBoardRole === "teacher" && onlineSectionOrderReady));
+        const sectionDragHandleTitle = sectionReorderEnabled
+          ? "Sectionをドラッグして順番を変更"
+          : !isTeacherMode() || (isOnlineBoard() && onlineBoardRole !== "teacher")
+            ? "Sectionの並び替えは先生のみ利用できます"
+            : "Supabase上のSectionとの対応を確認できないため並び替えできません";
+
         state.sections.forEach(sec => {
-          const secCards = cards.filter(c => c.sectionId === sec.id);
+          const secCards = getOrderedSectionCards(cards.filter(c => c.sectionId === sec.id));
 
           const colEl = document.createElement("div");
           colEl.className = "section-column";
           colEl.dataset.sectionId = sec.id;
 
+          colEl.addEventListener("dragover", (e) => {
+            if (!Array.from(e.dataTransfer.types).includes(SECTION_DRAG_DATA_TYPE)) return;
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            const previousPointerX = draggingSectionPointerX;
+            draggingSectionPointerX = e.clientX;
+            const previousPosition = colEl.dataset.sectionDropPosition;
+            clearSectionReorderIndicators();
+            const sourceColumn = Array.from(viewContainer.querySelectorAll(".section-column"))
+              .find(sectionColumn => sectionColumn.dataset.sectionId === draggedSectionId);
+            sourceColumn?.classList.add("section-drag-source");
+            if (!sectionReorderEnabled || isSavingSectionListOrder || sec.id === draggedSectionId) return;
+            const dropPosition = getSectionReorderDropPosition(
+              colEl,
+              e.clientX,
+              previousPointerX,
+              previousPosition
+            );
+            colEl.dataset.sectionDropPosition = dropPosition;
+            colEl.classList.add(dropPosition === "before" ? "section-reorder-before" : "section-reorder-after");
+          }, true);
+
+          colEl.addEventListener("dragleave", (e) => {
+            if (!Array.from(e.dataTransfer.types).includes(SECTION_DRAG_DATA_TYPE)) return;
+            if (e.relatedTarget instanceof Node && colEl.contains(e.relatedTarget)) return;
+            colEl.classList.remove("section-reorder-before", "section-reorder-after");
+            delete colEl.dataset.sectionDropPosition;
+          }, true);
+
+          colEl.addEventListener("drop", (e) => {
+            if (!Array.from(e.dataTransfer.types).includes(SECTION_DRAG_DATA_TYPE)) return;
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            const draggedId = e.dataTransfer.getData(SECTION_DRAG_DATA_TYPE);
+            const dropPosition = colEl.dataset.sectionDropPosition;
+            clearSectionReorderIndicators();
+            if (!sectionReorderEnabled || isSavingSectionListOrder || !dropPosition) return;
+            void reorderSectionsByDrag(draggedId, sec.id, dropPosition);
+          }, true);
+
           // Drag and drop events for column
           colEl.addEventListener("dragover", (e) => {
             e.preventDefault();
             colEl.classList.add("drag-over");
+            const previousPointerY = draggingSectionPointerY;
+            draggingSectionPointerY = e.clientY;
+            const targetCard = e.target instanceof Element
+              ? e.target.closest(".section-cards-list > .card")
+              : null;
+            const draggedCard = state.cards.find(card => card.id === draggingSectionCardId);
+            const previousPosition = targetCard?.dataset.dropPosition;
+            clearSectionDropIndicator(colEl);
+            const targetList = e.target instanceof Element
+              ? e.target.closest(".section-cards-list")
+              : null;
+            if (sectionCardDragEnabled && draggedCard && targetCard && targetCard.id !== draggingSectionCardId) {
+              const dropPosition = getSectionDropPosition(targetCard, e.clientY, previousPointerY, previousPosition);
+              targetCard.dataset.dropPosition = dropPosition;
+              targetCard.classList.add(dropPosition === "before" ? "drop-before" : "drop-after");
+            } else if (targetList && targetList.closest(".section-column") === colEl && targetList.children.length === 0) {
+              targetList.classList.add("drop-at-start");
+            }
           });
-          colEl.addEventListener("dragleave", () => {
+          colEl.addEventListener("dragleave", (e) => {
+            if (e.relatedTarget instanceof Node && colEl.contains(e.relatedTarget)) return;
             colEl.classList.remove("drag-over");
+            clearSectionDropIndicator(colEl);
           });
           colEl.addEventListener("drop", (e) => {
             e.preventDefault();
+            const targetCardElement = e.target instanceof Element
+              ? e.target.closest(".section-cards-list > .card")
+              : null;
+            const targetPosition = targetCardElement?.dataset.dropPosition;
             colEl.classList.remove("drag-over");
+            clearSectionDropIndicator(colEl);
+            if (!sectionCardDragEnabled || isSavingSectionOrder) return;
             const draggedCardId = e.dataTransfer.getData("text/plain");
-            if (draggedCardId) {
-              moveCardToSection(draggedCardId, sec.id);
+            if (!draggedCardId) return;
+            const draggedCard = state.cards.find(card => card.id === draggedCardId);
+            if (!draggedCard) return;
+
+            const targetCardId = targetCardElement?.id;
+            if (draggedCard.sectionId === sec.id) {
+              if (!targetCardId || targetCardId === draggedCardId) return;
+              void reorderCardsWithinSection(
+                sec.id,
+                draggedCardId,
+                targetCardId,
+                targetPosition ? targetPosition === "after" : e.clientY >= targetCardElement.getBoundingClientRect().top + targetCardElement.getBoundingClientRect().height / 2
+              );
+              return;
             }
+            moveCardToSection(draggedCardId, sec.id);
+          });
+          colEl.addEventListener("dragend", () => {
+            clearSectionDropIndicator(colEl);
+            colEl.classList.remove("drag-over");
           });
 
           colEl.innerHTML = `
             <div class="section-header">
+              <button type="button" class="section-drag-handle" aria-label="Sectionの順番を変更" title="${sectionDragHandleTitle}" ${sectionReorderEnabled ? "" : "disabled"}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                  <circle cx="8" cy="5" r="1"></circle>
+                  <circle cx="16" cy="5" r="1"></circle>
+                  <circle cx="8" cy="12" r="1"></circle>
+                  <circle cx="16" cy="12" r="1"></circle>
+                  <circle cx="8" cy="19" r="1"></circle>
+                  <circle cx="16" cy="19" r="1"></circle>
+                </svg>
+              </button>
               <div class="section-title">
                 <span>${escapeHtml(sec.title)}</span>
                 <span class="section-count">${secCards.length}</span>
@@ -3355,11 +4380,22 @@
             </button>
           `;
 
-          const listEl = colEl.querySelector(`#sec-list-${sec.id}`);
-          secCards.forEach(card => {
-            const cardEl = createCardElement(card, true);
-            listEl.appendChild(cardEl);
-          });
+          const sectionDragHandle = colEl.querySelector(".section-drag-handle");
+          sectionDragHandle.draggable = sectionReorderEnabled;
+          if (sectionReorderEnabled) {
+            sectionDragHandle.addEventListener("dragstart", (e) => {
+              e.dataTransfer.setData(SECTION_DRAG_DATA_TYPE, sec.id);
+              e.dataTransfer.effectAllowed = "move";
+              draggedSectionId = sec.id;
+              draggingSectionPointerX = e.clientX;
+              colEl.classList.add("section-drag-source");
+            });
+            sectionDragHandle.addEventListener("dragend", () => {
+              clearSectionReorderIndicators();
+              draggedSectionId = null;
+              draggingSectionPointerX = null;
+            });
+          }
 
           // Delete section handler
           colEl.querySelector(".delete-sec-btn").addEventListener("click", (e) => {
@@ -3376,6 +4412,12 @@
           // Add card to this section handler
           colEl.querySelector(".section-add-card-btn").addEventListener("click", () => {
             openPostModal(null, sec.id);
+          });
+
+          const sectionCardsList = colEl.querySelector(`#sec-list-${sec.id}`);
+          secCards.forEach(card => {
+            const cardEl = createCardElement(card, sectionCardDragEnabled, false);
+            sectionCardsList.appendChild(cardEl);
           });
 
           viewContainer.appendChild(colEl);
@@ -3431,48 +4473,59 @@
       // Setup Canvas Freeform Dragging
       function setupCanvasDragging(element, card) {
         let isDragging = false;
-        let startX, startY;
-        let initialX, initialY;
+        let dragStartX = 0;
+        let dragStartY = 0;
+        let initialX = 0;
+        let initialY = 0;
+        let offsetX = 0;
+        let offsetY = 0;
+
+        element.style.cursor = canMoveCanvasCard() ? "grab" : "default";
 
         element.addEventListener("mousedown", (e) => {
-          // Don't drag if clicking buttons, inputs, links, or comments
-          if (e.target.closest("button") || e.target.closest("input") || e.target.closest("a") || e.target.closest(".card-comments-drawer")) {
+          if (!canMoveCanvasCard()) return;
+          if (e.button !== 0) return;
+          if (e.target.closest("button, input, textarea, select, a, label, [contenteditable='true'], .card-comments-drawer, .tag-chip[data-tag], .card-image-wrap, .card-actions-btn, .card-menu-btn, .comment-submit-btn, .checklist-item, .checklist-delete-btn")) {
             return;
           }
+
+          e.preventDefault();
+          e.stopPropagation();
+
           isDragging = true;
           element.classList.add("dragging");
-          startX = e.clientX;
-          startY = e.clientY;
+          element.style.cursor = "grabbing";
+
+          const rect = element.getBoundingClientRect();
+          dragStartX = e.clientX;
+          dragStartY = e.clientY;
           initialX = element.offsetLeft;
           initialY = element.offsetTop;
+          offsetX = e.clientX - rect.left;
+          offsetY = e.clientY - rect.top;
 
-          // Bring card to front
           const allCards = document.querySelectorAll(".card.in-canvas");
           allCards.forEach(c => c.style.zIndex = "10");
           element.style.zIndex = "30";
 
-          function onMouseMove(ev) {
+          const onMouseMove = (ev) => {
             if (!isDragging) return;
-            const dx = ev.clientX - startX;
-            const dy = ev.clientY - startY;
-            const newX = Math.max(10, initialX + dx);
-            const newY = Math.max(10, initialY + dy);
-            element.style.left = `${newX}px`;
-            element.style.top = `${newY}px`;
-          }
+            const canvasRect = viewContainer.getBoundingClientRect();
+            const nextX = Math.max(10, ev.clientX - canvasRect.left - offsetX);
+            const nextY = Math.max(10, ev.clientY - canvasRect.top - offsetY);
+            element.style.left = `${nextX}px`;
+            element.style.top = `${nextY}px`;
+          };
 
-          function onMouseUp(ev) {
+          const onMouseUp = () => {
             if (!isDragging) return;
             isDragging = false;
             element.classList.remove("dragging");
+            element.style.cursor = canMoveCanvasCard() ? "grab" : "default";
             window.removeEventListener("mousemove", onMouseMove);
             window.removeEventListener("mouseup", onMouseUp);
-
-            // Update card position in state
-            card.canvasX = element.offsetLeft;
-            card.canvasY = element.offsetTop;
-            saveToStorage();
-          }
+            void saveCanvasCardPosition(card, element, initialX, initialY);
+          };
 
           window.addEventListener("mousemove", onMouseMove);
           window.addEventListener("mouseup", onMouseUp);
@@ -3531,7 +4584,21 @@
           showToast("投稿の表示状態を変更できるのは先生だけです。", "⚠️");
           return;
         }
-        card.isHidden = card.isHidden !== true;
+        const nextHidden = card.isHidden !== true;
+        if (isOnlineBoard()) {
+          window.PadletSupabase.setPostVisibility(card.id, nextHidden).then(moderation => {
+            handleRemoteModerationChange({
+              eventType: postModerationByPost.has(card.id) ? "UPDATE" : "INSERT",
+              new: moderation
+            });
+            showToast(nextHidden ? "投稿を非表示にしました" : "投稿を再表示しました", nextHidden ? "🙈" : "👁️");
+          }).catch(error => {
+            showToast("投稿の表示状態を保存できませんでした。", "⚠️");
+            console.warn("Supabase moderation update failed:", error.message);
+          });
+          return;
+        }
+        card.isHidden = nextHidden;
         saveToStorage();
         renderApp();
         showToast(card.isHidden ? "投稿を非表示にしました" : "投稿を再表示しました", card.isHidden ? "🙈" : "👁️");
@@ -3557,9 +4624,17 @@
           el.draggable = true;
           el.addEventListener("dragstart", (e) => {
             e.dataTransfer.setData("text/plain", card.id);
+            draggingSectionCardId = card.id;
+            draggingSectionPointerY = e.clientY;
             el.classList.add("dragging");
           });
           el.addEventListener("dragend", () => {
+            viewContainer.querySelectorAll(".section-column").forEach(sectionColumn => {
+              clearSectionDropIndicator(sectionColumn);
+              sectionColumn.classList.remove("drag-over");
+            });
+            draggingSectionCardId = null;
+            draggingSectionPointerY = null;
             el.classList.remove("dragging");
           });
         }
@@ -3634,8 +4709,15 @@
 
         // Comments count
         const commentsCount = (card.comments || []).length;
+        const latestComment = isOnlineBoard() ? getLatestComment(card.comments || []) : null;
+        const latestCommentHtml = latestComment ? `
+          <div class="latest-comment-preview" aria-label="最新のコメント">
+            <span class="latest-comment-preview-author">${escapeHtml(latestComment.author || "ユーザー")}</span>
+            <div class="latest-comment-preview-text">${escapeHtml(latestComment.text || "")}</div>
+          </div>
+        ` : "";
         const hiddenPost = card.isHidden === true;
-        const hiddenLabelHtml = isTeacherMode() && hiddenPost
+        const hiddenLabelHtml = canReviewHiddenPosts() && hiddenPost
           ? `<span class="hidden-post-label">非表示</span>`
           : "";
         const editButtonHtml = canEditPost(card) ? `
@@ -3697,7 +4779,7 @@
                 </svg>
                 <span class="like-count">${card.likes || 0}</span>
               </button>
-              <button class="card-actions-btn toggle-comments-btn" title="コメント">
+              <button class="card-actions-btn toggle-comments-btn" title="コメント" aria-expanded="false">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                 </svg>
@@ -3705,6 +4787,8 @@
               </button>
             </div>
           </div>
+
+          ${latestCommentHtml}
 
           <!-- Comments Drawer -->
           <div class="card-comments-drawer" id="comments-${card.id}">
@@ -3764,8 +4848,27 @@
 
         // Event: Like button
         const likeBtn = el.querySelector(".like-btn");
-        likeBtn.addEventListener("click", (e) => {
+        likeBtn.addEventListener("click", async (e) => {
           e.stopPropagation();
+          if (isOnlineBoard()) {
+            likeBtn.disabled = true;
+            const wasLiked = card.isLiked === true;
+            try {
+              const like = wasLiked
+                ? await window.PadletSupabase.removePostLike(card.id)
+                : await window.PadletSupabase.addPostLike(state.activeBoardId, card.id);
+              handleRemoteLikeChange({
+                eventType: wasLiked ? "DELETE" : "INSERT",
+                old: like || { post_id: card.id, user_id: onlineUserId },
+                new: like
+              });
+            } catch (error) {
+              likeBtn.disabled = false;
+              showToast("いいねを保存できませんでした。", "⚠️");
+              console.warn("Supabase like update failed:", error.message);
+            }
+            return;
+          }
           card.isLiked = !card.isLiked;
           card.likes = (card.likes || 0) + (card.isLiked ? 1 : -1);
           saveToStorage();
@@ -3775,18 +4878,41 @@
         // Event: Toggle comments drawer
         const toggleCommentsBtn = el.querySelector(".toggle-comments-btn");
         const commentsDrawer = el.querySelector(".card-comments-drawer");
+        const latestCommentPreview = el.querySelector(".latest-comment-preview");
         toggleCommentsBtn.addEventListener("click", (e) => {
           e.stopPropagation();
-          commentsDrawer.classList.toggle("open");
+          const isOpen = commentsDrawer.classList.toggle("open");
+          toggleCommentsBtn.setAttribute("aria-expanded", String(isOpen));
+          if (latestCommentPreview) latestCommentPreview.hidden = isOpen;
         });
 
         // Event: Add Comment
         const commentForm = el.querySelector(".comment-form");
         const commentInput = el.querySelector(".comment-input");
-        commentForm.addEventListener("submit", (e) => {
+        commentForm.addEventListener("submit", async (e) => {
           e.preventDefault();
           const text = commentInput.value.trim();
           if (!text) return;
+          if (isOnlineBoard()) {
+            const authorLabel = currentStudentNumber !== null
+              ? `No.${currentStudentNumber}`
+              : (onlineBoardRole === "teacher" ? "先生" : "あなた");
+            try {
+              const comment = await window.PadletSupabase.createComment({
+                boardId: state.activeBoardId,
+                postId: card.id,
+                authorLabel,
+                content: text
+              });
+              handleRemoteCommentChange({ eventType: "INSERT", new: comment });
+              commentInput.value = "";
+              showToast("コメントを追加しました", "💬");
+            } catch (error) {
+              showToast("コメントを保存できませんでした。", "⚠️");
+              console.warn("Supabase comment creation failed:", error.message);
+            }
+            return;
+          }
           if (!card.comments) card.comments = [];
           card.comments.push({
             author: "あなた",
@@ -3911,7 +5037,9 @@
 
       function selectColorSwatch(color) {
         document.querySelectorAll(".color-swatch-item").forEach(swatch => {
-          if (swatch.dataset.cardColor === color) {
+          const selected = swatch.dataset.cardColor === color;
+          swatch.setAttribute("aria-pressed", String(selected));
+          if (selected) {
             swatch.classList.add("selected");
           } else {
             swatch.classList.remove("selected");
@@ -3975,8 +5103,23 @@
       });
 
       // Post Form Submission
-      postForm.addEventListener("submit", async (e) => {
+      let isSubmittingPost = false;
+      const savePostBtn = document.getElementById("savePostBtn");
+      postForm.addEventListener("submit", (e) => {
         e.preventDefault();
+        if (isSubmittingPost) return;
+        isSubmittingPost = true;
+        savePostBtn.disabled = true;
+        submitPostForm().catch(error => {
+          showToast("投稿を保存できませんでした。", "⚠️");
+          console.error("Post submission failed:", error);
+        }).finally(() => {
+          isSubmittingPost = false;
+          savePostBtn.disabled = false;
+        });
+      });
+
+      async function submitPostForm() {
         const title = cardTitleInput.value.trim();
         if (!title) return;
         const editingCard = state.editingCardId
@@ -4088,7 +5231,7 @@
         saveToStorage();
         closePostModal();
         renderApp();
-      });
+      }
 
       // ======================================================================
       // Board Title & Description Edit
@@ -4139,6 +5282,18 @@
       });
       closeTeacherAuthBtn.addEventListener("click", closeTeacherAuthModal);
       cancelTeacherAuthBtn.addEventListener("click", closeTeacherAuthModal);
+      teacherAuthResetBtn.addEventListener("click", () => {
+        localStorage.removeItem(TEACHER_AUTH_STORAGE_KEY);
+        teacherAuthForm.reset();
+        teacherAuthError.textContent = "保存済みの先生パスワードをリセットしました。新しいパスワードを設定してください。";
+        teacherAuthTitle.textContent = "先生モードを設定";
+        teacherAuthNote.textContent = "初回のみ先生用パスワードを設定します。パスワードはこの端末にハッシュ化して保存されます。";
+        teacherPasswordConfirmGroup.hidden = false;
+        teacherPasswordConfirmInput.required = true;
+        teacherAuthSubmitBtn.textContent = "設定して開始";
+        teacherAuthResetBtn.hidden = true;
+        setTimeout(() => teacherPasswordInput.focus(), 120);
+      });
       teacherAuthModal.addEventListener("click", (e) => {
         if (e.target === teacherAuthModal) closeTeacherAuthModal();
       });
@@ -4164,7 +5319,7 @@
             return;
           }
           if (passwordHash !== storedHash) {
-            teacherAuthError.textContent = "パスワードが正しくありません。";
+            teacherAuthError.textContent = "パスワードが正しくありません。パスワードをリセットして再設定できます。";
             return;
           }
           closeTeacherAuthModal();
@@ -4289,16 +5444,18 @@
       // Color Filter Pills
       colorPills.forEach(pill => {
         pill.addEventListener("click", () => {
-          colorPills.forEach(p => p.classList.remove("active"));
-          pill.classList.add("active");
           state.colorFilter = pill.dataset.color;
           renderApp();
         });
       });
 
+      cardSizeButtons.forEach(button => {
+        button.addEventListener("click", () => setCardSize(button.dataset.cardSize));
+      });
+
       document.querySelectorAll(".visibility-filter-btn").forEach(button => {
         button.addEventListener("click", () => {
-          if (!isTeacherMode()) return;
+          if (!canReviewHiddenPosts()) return;
           visibilityFilter = button.dataset.visibilityFilter;
           renderApp();
         });

@@ -87,3 +87,9 @@ Phase 1-Bでは`posts`のCRUDに必要な次の権限も追加しています。
 - これらはRLSポリシーと併用され、RLSを迂回するものではありません。
 
 RPC適用前でも、RPCが失敗した場合は既存の掲示板作成がLocalStorageへフォールバックします。既存の`padlet_mvp_store_v1`は削除・変換しません。
+
+## Supabase Phase 1-D
+
+オンラインボードでは、いいねを`post_likes`、コメントを`post_comments`、投稿の非表示状態を既存の`post_moderation`へ保存します。投稿本文とは別データとして扱うため、投稿編集ではいいね・コメント・非表示状態を置き換えません。いいねはAnonymous Sign-inの`auth.uid()`ごとに1件までです。
+
+Phase 1-Dの適用時は、更新済みの [supabase/schema.sql](supabase/schema.sql) 全体をSupabase SQL Editorで再実行してください。新しいテーブル、RLS、Realtime publication登録はいずれも再実行可能です。フロントエンドのteacher mode表示にかかわらず、オンライン権限は`board_members.role`とRLSで検証します。LocalStorage専用ボードのいいね・コメント・非表示動作は従来どおりです。

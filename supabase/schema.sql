@@ -40,6 +40,8 @@ create table if not exists public.posts (
   legacy_id text,
   board_id uuid not null references public.boards(id) on delete cascade,
   section_id uuid references public.sections(id) on delete set null,
+  display_order numeric,
+  wall_display_order numeric,
   author_user_id uuid not null references auth.users(id) on delete restrict,
   student_number integer,
   title text not null,
@@ -56,6 +58,31 @@ create table if not exists public.posts (
   unique (board_id, legacy_id)
 );
 
+alter table public.posts add column if not exists display_order numeric;
+alter table public.posts add column if not exists wall_display_order numeric;
+
+create unique index if not exists posts_board_id_id_uidx on public.posts(board_id, id);
+
+create table if not exists public.post_likes (
+  board_id uuid not null references public.boards(id) on delete cascade,
+  post_id uuid not null,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (post_id, user_id),
+  foreign key (board_id, post_id) references public.posts(board_id, id) on delete cascade
+);
+
+create table if not exists public.post_comments (
+  id uuid primary key default gen_random_uuid(),
+  board_id uuid not null references public.boards(id) on delete cascade,
+  post_id uuid not null,
+  author_user_id uuid not null references auth.users(id) on delete cascade,
+  author_label text not null,
+  content text not null check (char_length(trim(content)) > 0),
+  created_at timestamptz not null default now(),
+  foreign key (board_id, post_id) references public.posts(board_id, id) on delete cascade
+);
+
 create table if not exists public.post_moderation (
   post_id uuid primary key references public.posts(id) on delete cascade,
   is_hidden boolean not null default false,
@@ -67,7 +94,12 @@ create table if not exists public.post_moderation (
 create index if not exists sections_board_id_idx on public.sections(board_id);
 create index if not exists posts_board_id_created_at_idx on public.posts(board_id, created_at desc);
 create index if not exists posts_author_user_id_idx on public.posts(author_user_id);
+create index if not exists post_likes_board_id_idx on public.post_likes(board_id);
+create index if not exists post_comments_board_id_created_at_idx on public.post_comments(board_id, created_at);
+create index if not exists post_comments_post_id_idx on public.post_comments(post_id);
 create index if not exists post_moderation_hidden_idx on public.post_moderation(is_hidden);
+
+alter table public.post_comments replica identity full;
 
 create or replace function public.set_updated_at()
 returns trigger
@@ -99,6 +131,27 @@ create trigger post_moderation_set_updated_at
 before update on public.post_moderation
 for each row execute function public.set_updated_at();
 
+create or replace function public.set_post_moderation_state()
+returns trigger
+language plpgsql
+as $$
+begin
+  if new.is_hidden then
+    new.hidden_by = auth.uid();
+    new.hidden_at = now();
+  else
+    new.hidden_by = null;
+    new.hidden_at = null;
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists post_moderation_set_state on public.post_moderation;
+create trigger post_moderation_set_state
+before insert or update on public.post_moderation
+for each row execute function public.set_post_moderation_state();
+
 create or replace function public.is_board_member(target_board_id uuid)
 returns boolean
 language sql
@@ -128,6 +181,159 @@ as $$
       and user_id = auth.uid()
       and role = 'teacher'
   );
+$$;
+
+create or replace function public.reorder_board_wall_posts(
+  target_board_id uuid,
+  ordered_post_ids uuid[]
+)
+returns void
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+declare
+  locked_board_id uuid;
+  expected_post_count integer;
+  updated_post_count integer;
+begin
+  if auth.uid() is null then
+    raise exception 'authentication required';
+  end if;
+  if not public.is_board_teacher(target_board_id) then
+    raise exception 'board teacher role required';
+  end if;
+
+  select id into locked_board_id
+  from public.boards
+  where id = target_board_id
+  for update;
+  if locked_board_id is null then
+    raise exception 'board not found';
+  end if;
+
+  perform id
+  from public.posts
+  where board_id = target_board_id
+  for update;
+
+  select count(*) into expected_post_count
+  from public.posts
+  where board_id = target_board_id;
+
+  if ordered_post_ids is null
+     or cardinality(ordered_post_ids) <> expected_post_count then
+    raise exception 'post list does not match board';
+  end if;
+  if (
+    select count(distinct requested.post_id)
+    from unnest(ordered_post_ids) as requested(post_id)
+  ) <> cardinality(ordered_post_ids) then
+    raise exception 'post list contains duplicates or null values';
+  end if;
+  if exists (
+    select 1
+    from unnest(ordered_post_ids) as requested(post_id)
+    where not exists (
+      select 1
+      from public.posts
+      where id = requested.post_id
+        and board_id = target_board_id
+    )
+  ) then
+    raise exception 'post does not belong to board';
+  end if;
+  if exists (
+    select 1
+    from unnest(ordered_post_ids) with ordinality as ordered(post_id, ordinality)
+    join public.posts as current_post on current_post.id = ordered.post_id
+    where current_post.board_id = target_board_id
+      and current_post.pinned
+      and exists (
+        select 1
+        from unnest(ordered_post_ids) with ordinality as preceding(preceding_post_id, ordinality)
+        join public.posts as preceding_post on preceding_post.id = preceding.preceding_post_id
+        where preceding.ordinality < ordered.ordinality
+          and preceding_post.board_id = target_board_id
+          and not preceding_post.pinned
+      )
+  ) then
+    raise exception 'pinned posts must precede regular posts';
+  end if;
+
+  update public.posts as post
+  set wall_display_order = (ordered.ordinality - 1)::numeric
+  from unnest(ordered_post_ids) with ordinality as ordered(post_id, ordinality)
+  where post.id = ordered.post_id
+    and post.board_id = target_board_id;
+  get diagnostics updated_post_count = row_count;
+  if updated_post_count <> expected_post_count then
+    raise exception 'not all posts were reordered';
+  end if;
+end;
+$$;
+
+create or replace function public.reorder_board_sections(
+  target_board_id uuid,
+  ordered_section_ids uuid[]
+)
+returns void
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+declare
+  locked_board_id uuid;
+  expected_section_count integer;
+begin
+  if auth.uid() is null then
+    raise exception 'authentication required';
+  end if;
+  if not public.is_board_teacher(target_board_id) then
+    raise exception 'board teacher role required';
+  end if;
+
+  select id into locked_board_id
+  from public.boards
+  where id = target_board_id
+  for update;
+  if locked_board_id is null then
+    raise exception 'board not found';
+  end if;
+
+  select count(*) into expected_section_count
+  from public.sections
+  where board_id = target_board_id;
+
+  if ordered_section_ids is null
+     or cardinality(ordered_section_ids) <> expected_section_count then
+    raise exception 'section list does not match board';
+  end if;
+  if (
+    select count(distinct requested.section_id)
+    from unnest(ordered_section_ids) as requested(section_id)
+  ) <> cardinality(ordered_section_ids) then
+    raise exception 'section list contains duplicates or null values';
+  end if;
+  if exists (
+    select 1
+    from unnest(ordered_section_ids) as requested(section_id)
+    where not exists (
+      select 1
+      from public.sections
+      where id = requested.section_id
+        and board_id = target_board_id
+    )
+  ) then
+    raise exception 'section does not belong to board';
+  end if;
+
+  update public.sections as section
+  set sort_order = (ordered.ordinality - 1)::integer
+  from unnest(ordered_section_ids) with ordinality as ordered(section_id, ordinality)
+  where section.id = ordered.section_id
+    and section.board_id = target_board_id;
+end;
 $$;
 
 create or replace function public.create_board_with_owner(
@@ -221,17 +427,25 @@ revoke all on function public.join_board_as_student(uuid) from public;
 grant execute on function public.join_board_as_student(uuid) to authenticated;
 revoke all on function public.join_board_by_legacy_id(text) from public;
 grant execute on function public.join_board_by_legacy_id(text) to authenticated;
+revoke all on function public.reorder_board_sections(uuid, uuid[]) from public;
+grant execute on function public.reorder_board_sections(uuid, uuid[]) to authenticated;
+revoke all on function public.reorder_board_wall_posts(uuid, uuid[]) from public;
+grant execute on function public.reorder_board_wall_posts(uuid, uuid[]) to authenticated;
 
 alter table public.boards enable row level security;
 alter table public.board_members enable row level security;
 alter table public.sections enable row level security;
 alter table public.posts enable row level security;
+alter table public.post_likes enable row level security;
+alter table public.post_comments enable row level security;
 alter table public.post_moderation enable row level security;
 
 grant select on public.boards to authenticated;
 grant select on public.board_members to authenticated;
 grant select, insert, update, delete on public.posts to authenticated;
 grant select on public.sections to authenticated;
+grant select, insert, delete on public.post_likes to authenticated;
+grant select, insert, update, delete on public.post_comments to authenticated;
 grant select, insert, update on public.post_moderation to authenticated;
 
 drop policy if exists boards_member_select on public.boards;
@@ -320,6 +534,60 @@ using (
   or public.is_board_teacher(board_id)
 );
 
+drop policy if exists post_likes_member_select on public.post_likes;
+create policy post_likes_member_select
+on public.post_likes for select to authenticated
+using (public.is_board_member(board_id));
+
+drop policy if exists post_likes_self_insert on public.post_likes;
+create policy post_likes_self_insert
+on public.post_likes for insert to authenticated
+with check (
+  user_id = auth.uid()
+  and public.is_board_member(board_id)
+);
+
+drop policy if exists post_likes_self_delete on public.post_likes;
+create policy post_likes_self_delete
+on public.post_likes for delete to authenticated
+using (
+  user_id = auth.uid()
+  and public.is_board_member(board_id)
+);
+
+drop policy if exists post_comments_member_select on public.post_comments;
+create policy post_comments_member_select
+on public.post_comments for select to authenticated
+using (public.is_board_member(board_id));
+
+drop policy if exists post_comments_member_insert on public.post_comments;
+create policy post_comments_member_insert
+on public.post_comments for insert to authenticated
+with check (
+  author_user_id = auth.uid()
+  and public.is_board_member(board_id)
+);
+
+drop policy if exists post_comments_author_update on public.post_comments;
+create policy post_comments_author_update
+on public.post_comments for update to authenticated
+using (
+  author_user_id = auth.uid()
+  and public.is_board_member(board_id)
+)
+with check (
+  author_user_id = auth.uid()
+  and public.is_board_member(board_id)
+);
+
+drop policy if exists post_comments_author_delete on public.post_comments;
+create policy post_comments_author_delete
+on public.post_comments for delete to authenticated
+using (
+  author_user_id = auth.uid()
+  and public.is_board_member(board_id)
+);
+
 drop policy if exists moderation_member_select on public.post_moderation;
 create policy moderation_member_select
 on public.post_moderation for select to authenticated
@@ -364,18 +632,23 @@ with check (
   )
 );
 
--- Phase 1-C: publish posts changes only. This is intentionally idempotent.
+-- Publish board data changes. This is intentionally idempotent.
 do $$
+declare
+  realtime_table text;
 begin
-  if exists (select 1 from pg_publication where pubname = 'supabase_realtime')
-     and not exists (
-       select 1
-       from pg_publication_tables
-       where pubname = 'supabase_realtime'
-         and schemaname = 'public'
-         and tablename = 'posts'
-     ) then
-    alter publication supabase_realtime add table public.posts;
+  if exists (select 1 from pg_publication where pubname = 'supabase_realtime') then
+    foreach realtime_table in array array['posts', 'post_comments', 'post_likes', 'post_moderation'] loop
+      if not exists (
+        select 1
+        from pg_publication_tables
+        where pubname = 'supabase_realtime'
+          and schemaname = 'public'
+          and tablename = realtime_table
+      ) then
+        execute format('alter publication supabase_realtime add table public.%I', realtime_table);
+      end if;
+    end loop;
   end if;
 end;
 $$;
